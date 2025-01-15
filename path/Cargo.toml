@@ -1,0 +1,8 @@
+[package]
+name = "path"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+math = { version = "0.1.0", path = "../math" }
+num-traits = "0.2.19"

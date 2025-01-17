@@ -40,11 +40,19 @@ impl From<Dec> for i32 {
 
 impl num_traits::ToPrimitive for Dec {
     fn to_i64(&self) -> Option<i64> {
-        todo!()
+        self.0.to_i64()
     }
 
     fn to_u64(&self) -> Option<u64> {
-        todo!()
+        self.0.to_u64()
+    }
+
+    fn to_f32(&self) -> Option<f32> {
+        self.0.to_f32()
+    }
+
+    fn to_f64(&self) -> Option<f64> {
+        self.0.to_f64()
     }
 }
 
@@ -112,7 +120,7 @@ impl num_traits::Float for Dec {
     }
 
     fn round(self) -> Self {
-        todo!()
+        Self(self.0.round())
     }
 
     fn trunc(self) -> Self {
@@ -187,8 +195,8 @@ impl num_traits::Float for Dec {
         Self(self.0.max(other.0))
     }
 
-    fn min(self, _other: Self) -> Self {
-        todo!()
+    fn min(self, other: Self) -> Self {
+        Self(self.0.min(other.0))
     }
 
     fn abs_sub(self, _other: Self) -> Self {

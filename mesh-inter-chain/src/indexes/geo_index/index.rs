@@ -2039,10 +2039,6 @@ where
                 }
             }
         }
-        println!(
-            "  .. collect facemeshindex {}ms",
-            _t.elapsed().unwrap().as_millis()
-        );
         let _t = SystemTime::now();
 
         let ribs_with_faces = self
@@ -2058,10 +2054,6 @@ where
                 meshes.contains(&of_mesh) && meshes.contains(&by_mesh)
             })
             .collect_vec();
-        println!(
-            "  .. collect ribs with faces {}ms",
-            _t.elapsed().unwrap().as_millis()
-        );
 
         let mut planes: Vec<Plane<S>> = Vec::new();
         let mut poly_plane = BTreeMap::new();
@@ -2094,7 +2086,6 @@ where
                 }
             }
         }
-        println!("  .. fill shared {}ms", _t.elapsed().unwrap().as_millis());
 
         if matches!(filter, PolygonFilter::Shared) {
             // early return for shareds
@@ -2164,16 +2155,8 @@ where
                 }
             }
         }
-        println!(
-            "  .. detect edge polies {}ms",
-            _t.elapsed().unwrap().as_millis()
-        );
         let _t = SystemTime::now();
         let visited = self.spread_visited_around_2(&ribs, of_mesh, visited);
-        println!(
-            "  .. spread outer polies {}ms",
-            _t.elapsed().unwrap().as_millis()
-        );
         let result = visited
             .into_iter()
             .filter(|(_, r)| *r == filter)
@@ -2182,7 +2165,6 @@ where
                 poly_id,
             })
             .collect_vec();
-        println!("select: {}ms", _ts.elapsed().unwrap().as_millis());
         result
     }
 
@@ -2247,27 +2229,6 @@ where
         chain: Vec<Seg>,
     ) -> Option<(Vec<Seg>, Vec<Seg>)> {
         let face_ref = self.load_face_ref(face_id);
-        if face_id.0 == 2494 {
-            println!("~~~~~~~~~~~~~~~~~~~~~~~~");
-            for ch in &chain {
-                let sr = ch.make_ref(self);
-                println!(
-                    "possible chain: {:?}: {:?} -> {:?}",
-                    sr.rib_id,
-                    sr.from_pt(),
-                    sr.to_pt()
-                )
-            }
-            println!("--");
-            for sr in face_id.make_ref(self).segments(SegmentDir::Fow) {
-                println!(
-                    "poly: {:?}: {:?} -> {:?}",
-                    sr.rib_id,
-                    sr.from_pt(),
-                    sr.to_pt()
-                )
-            }
-        }
 
         let chain_without_face_ribs = chain
             .into_iter()
@@ -2413,8 +2374,6 @@ where
         vertex_pulling_sq: S,
         _do_debug: bool,
     ) -> usize {
-        //let vertex_pulling = S::from(dec!(0.001)); // one micrometer
-        //let vertex_pulling_sq = vertex_pulling * vertex_pulling;
         if _do_debug {
             println!("Line: {line:?}");
         }

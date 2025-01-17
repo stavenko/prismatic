@@ -18,7 +18,7 @@ There are several examples, when this repo downloaded, we can run:
 ```
 cargo run --example booleans -- --output-path ~/projects/scad-files/booleans
 ```
-This example will create scad file in given folder with some interestion
+This example will create scad file in given folder with some interesting
 operations, which are possible with this library.
 
 ## Terminology

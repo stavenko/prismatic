@@ -2,7 +2,7 @@ use crate::{
     get_length::GetLength, get_t::GetT, path_builder::PathBuilder, path_item::PathItem,
     update_start_end::UpdateStartEnd,
 };
-use math::Tensor;
+use math::{Scalar, Tensor};
 use num_traits::{Float, One, Zero};
 
 #[derive(Clone, Debug)]
@@ -56,7 +56,7 @@ where
     type Tensor = T;
 
     fn get_t(&self, mut t: <Self::Tensor as Tensor>::Scalar) -> Self::Tensor {
-        let max_delta = T::Scalar::one() / (1_000_000.into());
+        let max_delta = T::Scalar::one() / T::Scalar::from_value(1_000_000);
 
         let delta = (T::Scalar::zero() - t).abs();
         if t < T::Scalar::zero() {
@@ -139,7 +139,7 @@ impl<T: Tensor> Path<T> {
     }
 
     pub fn connect_ends(&mut self) {
-        let half = <T as Tensor>::Scalar::one() / <T as Tensor>::Scalar::from(2);
+        let half = <T as Tensor>::Scalar::one() / <T as Tensor>::Scalar::two();
         for cur in 0..(self.items.len() - 1) {
             let next = cur + 1;
             let f = self.items[cur].get_t(T::Scalar::one());
@@ -154,7 +154,7 @@ impl<T: Tensor> Path<T> {
     }
 
     pub fn connect_ends_circular(&mut self) {
-        let half = <T as Tensor>::Scalar::one() / <T as Tensor>::Scalar::from(2);
+        let half = <T as Tensor>::Scalar::one() / <T as Tensor>::Scalar::two();
         for cur in 0..(self.items.len()) {
             let next = (cur + 1) % self.items.len();
             let f = self.items[cur].get_t(T::Scalar::one());

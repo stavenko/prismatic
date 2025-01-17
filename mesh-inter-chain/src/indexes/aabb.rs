@@ -43,7 +43,7 @@ where
     S: Scalar,
 {
     pub fn split_x(&self) -> [Self; 2] {
-        let middle = self.min.lerp(&self.max, 0.5.into());
+        let middle = self.min.lerp(&self.max, S::half());
 
         [
             Aabb::from_points(&[self.min, Vector3::new(middle.x, self.max.y, self.max.z)]),
@@ -52,7 +52,7 @@ where
     }
 
     pub fn split_y(&self) -> [Self; 2] {
-        let middle = self.min.lerp(&self.max, 0.5.into());
+        let middle = self.min.lerp(&self.max, S::half());
 
         [
             Aabb::from_points(&[self.min, Vector3::new(self.max.x, middle.y, self.max.z)]),
@@ -60,7 +60,7 @@ where
         ]
     }
     pub fn split_z(&self) -> [Self; 2] {
-        let middle = self.min.lerp(&self.max, 0.5.into());
+        let middle = self.min.lerp(&self.max, S::half());
 
         [
             Aabb::from_points(&[self.min, Vector3::new(self.max.x, self.max.y, middle.z)]),
@@ -91,15 +91,15 @@ where
             Bounded::min_value(),
         );
         for p in points.iter() {
-            min.x = Ord::min(min.x, p.x);
-            min.y = Ord::min(min.y, p.y);
-            min.z = Ord::min(min.z, p.z);
+            min.x = min.x.min(p.x);
+            min.y = min.y.min(p.y);
+            min.z = min.z.min(p.z);
 
-            max.x = Ord::max(max.x, p.x);
-            max.y = Ord::max(max.y, p.y);
-            max.z = Ord::max(max.z, p.z);
+            max.x = max.x.max(p.x);
+            max.y = max.y.max(p.y);
+            max.z = max.z.max(p.z);
         }
-        let d = <S as From<f64>>::from(0.000_1);
+        let d = S::from_value(0.000_1);
         let min = min - Vector3::new(d, d, d);
         let max = max + Vector3::new(d, d, d);
 
@@ -136,29 +136,17 @@ impl<S: Scalar> Relation<Sphere<S>> for Aabb<S> {
         let min_dist: S = center
             .iter()
             .zip(min_b)
-            .map(|(&c, m)| {
-                if c < m {
-                    (c - m).pow(2usize)
-                } else {
-                    S::zero()
-                }
-            })
+            .map(|(&c, m)| if c < m { (c - m).pow(2_i32) } else { S::zero() })
             .sum();
 
         let max_dist: S = center
             .iter()
             .zip(max_b)
-            .map(|(&c, m)| {
-                if c > m {
-                    (c - m).pow(2usize)
-                } else {
-                    S::zero()
-                }
-            })
+            .map(|(&c, m)| if c > m { (c - m).pow(2_i32) } else { S::zero() })
             .sum();
 
         //dbg!(max_dist, min_dist, sphere.radius);
-        if (max_dist + min_dist) < sphere.radius.pow(2_usize) {
+        if (max_dist + min_dist) < sphere.radius.pow(2_i32) {
             BoundRelation::Intersects
         } else {
             BoundRelation::Unrelated

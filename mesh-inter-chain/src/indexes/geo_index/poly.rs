@@ -80,8 +80,8 @@ impl<'a, S: Scalar> PolyRef<'a, S> {
             let to_pt = seg.to_pt();
             let v = self.index.vertices.get_point(pt);
             let to = self.index.vertices.get_point(to_pt);
-            let v2 = basis.project_on_plane_z(&v) * <S as From<usize>>::from(1000);
-            let to_v2 = basis.project_on_plane_z(&to) * <S as From<usize>>::from(1000);
+            let v2 = basis.project_on_plane_z(&v) * S::from_value(1000);
+            let to_v2 = basis.project_on_plane_z(&to) * S::from_value(1000);
             let d = (to_v2 - v2).magnitude();
             min_distance_betnween_points = num_traits::Float::min(min_distance_betnween_points, d);
             //let vv = basis.project_on_plane_z(v);
@@ -92,15 +92,15 @@ impl<'a, S: Scalar> PolyRef<'a, S> {
         let aabb = Aabb::from_points(&aabb);
         let mut width = aabb.max.x - aabb.min.x;
         let mut height = aabb.max.y - aabb.min.y;
-        let circle_size: S = min_distance_betnween_points * <S as From<usize>>::from(4);
-        let top = aabb.min.y - (circle_size / <S as From<usize>>::from(2));
-        let left = aabb.min.x - (circle_size / <S as From<usize>>::from(2));
-        width += circle_size * <S as From<usize>>::from(2);
-        height += circle_size * <S as From<usize>>::from(2);
+        let circle_size: S = min_distance_betnween_points * S::from_value(4);
+        let top = aabb.min.y - (circle_size / S::from_value(2));
+        let left = aabb.min.x - (circle_size / S::from_value(2));
+        width += circle_size * S::from_value(2);
+        height += circle_size * S::from_value(2);
         let aspect = width / height;
-        let img_width = <S as From<usize>>::from(800);
+        let img_width = S::from_value(800);
         let img_height = img_width / aspect;
-        let font = circle_size * <S as From<f64>>::from(0.7);
+        let font = circle_size * S::from_value(0.7);
 
         items.push(format!("<svg viewBox=\" {left} {top} {width} {height}\" xmlns=\"http://www.w3.org/2000/svg\" width=\"{img_width}\" height=\"{img_height}\">"));
         items.push(format!(
@@ -108,7 +108,7 @@ impl<'a, S: Scalar> PolyRef<'a, S> {
         ));
         for (ix, pt) in self.segments().map(|s| s.from_pt()).enumerate() {
             let v = self.index.vertices.get_point(pt);
-            let v2 = basis.project_on_plane_z(&v) * <S as From<usize>>::from(1000);
+            let v2 = basis.project_on_plane_z(&v) * S::from_value(1000);
             points.push(format!(
                 "<circle cx=\"{}\" cy=\"{}\" r=\"{circle_size}\" fill=\"{}\"/> <text x=\"{}\" y=\"{}\" text-anchor=\"middle\" >{pt} </text>
                 ",

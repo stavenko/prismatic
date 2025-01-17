@@ -325,7 +325,7 @@ where
         let chain_center = chain_pts
             .iter()
             .fold(Vector3::zero(), |a, p| a + self.vertices.get_point(*p))
-            / <S as From<usize>>::from(chain.len());
+            / S::from_value(chain.len());
         let points = chain_pts.len();
         let segs = [
             chain,
@@ -370,7 +370,8 @@ where
                     let test_dist = (test - origin).magnitude();
                     //println!("Maxing F: {p:?} [{}] {test_dist} {} ",test_dir.dot(&best_dir)/test_dist, test_dir.dot(&best_dir));
                     // Looks like heuristics, but works for now
-                    test_dir.dot(&best_dir) / test_dist
+                    
+                    (test_dir.dot(&best_dir) / test_dist) .mul( S::from_value(1e8)).to_isize()
                 })
             {
                 return Some((chain_pts[ix], p));
@@ -389,7 +390,7 @@ where
         let chain_center = chain_pts
             .iter()
             .fold(Vector3::zero(), |a, p| a + self.vertices.get_point(*p))
-            / <S as From<usize>>::from(chain.len());
+            / S::from_value(chain.len());
         let testing_pts_ix = chain_pts
             .iter()
             .enumerate()
@@ -399,7 +400,8 @@ where
                 let first_point_dir = (vv - chain_center).normalize();
                 let test_point_dir = (v - chain_center).normalize();
 
-                test_point_dir.dot(&first_point_dir)
+                test_point_dir.dot(&first_point_dir).mul( S::from_value(1e8)).to_isize()
+
             })
             .collect::<Vec<_>>();
         let segs = [
@@ -447,7 +449,11 @@ where
                     let test_dir = (test - origin).normalize();
                     let test_dist = (test - origin).magnitude();
                     // Looks like heuristics, but works for now
-                    test_dir.dot(&best_dir) / test_dist
+                    let comparable = (test_dir.dot(&best_dir) / test_dist
+                        * S::from_value(100_000_000))
+                    .to_usize();
+
+                    comparable
                 })
             {
                 return Some((chain_pts[ix], p));
@@ -593,7 +599,7 @@ where
     fn create_common_ribs_for_adjacent_faces(&mut self, tool_face_id: FaceId) {
         let tool_aabb = *self.faces[&tool_face_id].aabb();
         let tool_plane = &self.faces[&tool_face_id].plane();
-        let vertex_pulling = <S as From<f64>>::from(0.001); // one micrometer
+        let vertex_pulling = S::from_value(0.001); // one micrometer
         let vertex_pulling_sq = vertex_pulling * vertex_pulling;
 
         let faces_in_proximity = self
@@ -698,7 +704,7 @@ where
             .collect_vec();
 
         let segment_ref = SegmentRef::new(from, to, self);
-        let vertex_pulling = <S as From<f64>>::from(0.001); // one micrometer
+        let vertex_pulling = S::from_value(0.001); // one micrometer
         let vertex_pulling_sq = vertex_pulling * vertex_pulling;
 
         for sr in segments
@@ -808,6 +814,8 @@ where
             .sorted_by_key(|pt| {
                 (self.vertices.get_point(**pt) - rib_id.make_ref(self).from())
                     .dot(&rib_id.make_ref(self).dir())
+                    .mul(S::from_value(1e8))
+                    .to_isize()
             })
             .map(|pt| self.vertices.get_point(*pt))
             .collect_vec()
@@ -848,7 +856,10 @@ where
                 .iter()
                 .chain([&seg_ref.from_pt(), &seg_ref.to_pt()])
                 .sorted_by_key(|pt| {
-                    (self.vertices.get_point(**pt) - seg_ref.from()).dot(&seg_ref.dir())
+                    (self.vertices.get_point(**pt) - seg_ref.from())
+                        .dot(&seg_ref.dir())
+                        .mul(S::from_value(1e8))
+                        .to_isize()
                 })
                 .map(|pt| self.vertices.get_point(*pt))
                 .collect_vec()
@@ -1557,7 +1568,10 @@ where
             let pts_src = pts_src
                 .into_iter()
                 .sorted_by_key(|pt| {
-                    (self.vertices.get_point(*pt) - common_line.origin).dot(&common_line.dir)
+                    (self.vertices.get_point(*pt) - common_line.origin)
+                        .dot(&common_line.dir)
+                        .mul(S::from_value(1e8))
+                        .to_isize()
                 })
                 .dedup()
                 .collect_vec();
@@ -1565,7 +1579,10 @@ where
             let pts_tool = pts_tool
                 .into_iter()
                 .sorted_by_key(|pt| {
-                    (self.vertices.get_point(*pt) - common_line.origin).dot(&common_line.dir)
+                    (self.vertices.get_point(*pt) - common_line.origin)
+                        .dot(&common_line.dir)
+                        .mul(S::from_value(1e8))
+                        .to_isize()
                 })
                 .dedup()
                 .collect_vec();
@@ -1594,7 +1611,10 @@ where
                     .into_iter()
                     .chain(b)
                     .sorted_by_key(|pt| {
-                        (self.vertices.get_point(*pt) - common_line.origin).dot(&common_line.dir)
+                        (self.vertices.get_point(*pt) - common_line.origin)
+                            .dot(&common_line.dir)
+                            .mul(S::from_value(1e8))
+                            .to_isize()
                     })
                     .dedup()
                     .collect_vec();
@@ -1790,7 +1810,10 @@ where
                         .into_iter()
                         .sorted_by_key(|pt| {
                             let v = self.vertices.get_point(*pt);
-                            (v - line.origin).dot(&line.dir)
+                            (v - line.origin)
+                                .dot(&line.dir)
+                                .mul(S::from_value(1e8))
+                                .to_isize()
                         })
                         .dedup()
                         .collect_vec(),

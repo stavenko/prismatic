@@ -31,6 +31,13 @@ impl From<Dec> for usize {
         value.0.to_usize().unwrap_or_else(Zero::zero)
     }
 }
+
+impl From<Dec> for i32 {
+    fn from(value: Dec) -> Self {
+        value.0.to_i32().unwrap_or_else(Zero::zero)
+    }
+}
+
 impl num_traits::ToPrimitive for Dec {
     fn to_i64(&self) -> Option<i64> {
         todo!()
@@ -308,6 +315,14 @@ impl Pow<i64> for Dec {
 
     fn pow(self, rhs: i64) -> Self::Output {
         Dec(self.0.powi(rhs))
+    }
+}
+
+impl Pow<i32> for Dec {
+    type Output = Dec;
+
+    fn pow(self, rhs: i32) -> Self::Output {
+        Dec(self.0.powi(rhs as i64))
     }
 }
 

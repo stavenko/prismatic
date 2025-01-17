@@ -22,7 +22,7 @@ impl<T: Scalar> Quaternion<T> {
         } else {
             let axis = axis.normalize();
 
-            let half_angle = angle / <T as From<usize>>::from(2);
+            let half_angle = angle / T::from_value(2);
             let s = half_angle.sin();
 
             Self {
@@ -50,9 +50,9 @@ impl<T: Scalar> Mul<Vector3<T>> for Quaternion<T> {
         let qw = self.w;
 
         // t = 2 * cross( q.xyz, v );
-        let tx = <T as From<usize>>::from(2) * (qy * vz - qz * vy);
-        let ty = <T as From<usize>>::from(2) * (qz * vx - qx * vz);
-        let tz = <T as From<usize>>::from(2) * (qx * vy - qy * vx);
+        let tx = T::two() * (qy * vz - qz * vy);
+        let ty = T::two() * (qz * vx - qx * vz);
+        let tz = T::two() * (qx * vy - qy * vx);
 
         // v + q.w * t + cross( q.xyz, t );
         Vector3 {

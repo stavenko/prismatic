@@ -68,7 +68,13 @@ impl<S: Scalar> VertexIndex<S> {
         self.points
             .clone()
             .into_iter()
-            .map(|vec| [vec.x.into(), vec.y.into(), vec.z.into()])
+            .map(|vec| {
+                [
+                    vec.x.to_f64().expect("Convertion error"),
+                    vec.y.to_f64().expect("Convertion error"),
+                    vec.z.to_f64().expect("Convertion error"),
+                ]
+            })
             .collect_vec()
     }
 
@@ -77,7 +83,12 @@ impl<S: Scalar> VertexIndex<S> {
             center,
             radius: distance,
         });
-        points.sort_by_key(|node| (node.point - center).magnitude_squared());
+        points.sort_by_key(|node| {
+            (node.point - center)
+                .magnitude_squared()
+                .mul(S::from_value(1e8))
+                .to_isize()
+        });
         points.first().map(|node| PtId(node.data))
     }
 }

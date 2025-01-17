@@ -6,7 +6,7 @@ use math::{Matrix2, Scalar, Vector2, Vector3};
 
 use super::relation::Relation;
 
-pub const NORMAL_DOT_ROUNDING: usize = 4;
+pub const NORMAL_DOT_ROUNDING: i32 = 4;
 
 #[derive(PartialEq, Debug)]
 pub enum LinearRelation<S> {

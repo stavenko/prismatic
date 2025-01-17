@@ -1,5 +1,7 @@
 use std::marker::PhantomData;
 
+use num_traits::FromPrimitive;
+
 pub struct ParametricIterator<F> {
     segments: usize,
     current_segment: usize,
@@ -26,7 +28,7 @@ impl<F> ParametricIterator<F> {
 
 impl<F> Iterator for ParametricIterator<F>
 where
-    F: From<usize>,
+    F: FromPrimitive,
     F: std::ops::Div<Output = F>,
 {
     type Item = (F, F);
@@ -38,8 +40,10 @@ where
         if next > self.segments {
             None
         } else {
-            let first = F::from(first) / F::from(self.segments);
-            let next = F::from(next) / F::from(self.segments);
+            let first = F::from_usize(first).expect("Convertion error")
+                / F::from_usize(self.segments).expect("Convertion error");
+            let next = F::from_usize(next).expect("Convertion error")
+                / F::from_usize(self.segments).expect("Convertion error");
             Some((first, next))
         }
     }

@@ -187,8 +187,8 @@ impl<'a, S: Scalar> FaceRef<'a, S> {
             let to_pt = seg.to_pt();
             let v = self.index.vertices.get_point(pt);
             let to = self.index.vertices.get_point(to_pt);
-            let v2 = basis.project_on_plane_z(&v) * <S as From<usize>>::from(1000);
-            let to_v2 = basis.project_on_plane_z(&to) * <S as From<usize>>::from(1000);
+            let v2 = basis.project_on_plane_z(&v) * S::from_value(1000);
+            let to_v2 = basis.project_on_plane_z(&to) * S::from_value(1000);
             let d = (to_v2 - v2).magnitude();
             min_distance_between_points = num_traits::Float::min(min_distance_between_points, d);
             //let vv = basis.project_on_plane_z(v);
@@ -203,11 +203,11 @@ impl<'a, S: Scalar> FaceRef<'a, S> {
         let circle_size: S = width * S::from_value(20) / img_width;
         let top = aabb.min.y - (circle_size);
         let left = aabb.min.x - (circle_size);
-        width += circle_size * <S as From<usize>>::from(2);
-        height += circle_size * <S as From<usize>>::from(2);
+        width += circle_size * S::from_value(2);
+        height += circle_size * S::from_value(2);
         let aspect = width / height;
         let img_height = img_width / aspect;
-        let font = (circle_size * <S as From<f64>>::from(0.7)).round();
+        let font = (circle_size * S::from_value(0.7)).round();
 
         items.push(format!("<svg viewBox=\" {left} {top} {width} {height}\" xmlns=\"http://www.w3.org/2000/svg\" width=\"{img_width}\" height=\"{img_height}\">"));
         items.push(format!(
@@ -220,7 +220,7 @@ impl<'a, S: Scalar> FaceRef<'a, S> {
             .chain(additional_points.iter().cloned().enumerate())
         {
             let v = self.index.vertices.get_point(pt);
-            let v2 = basis.project_on_plane_z(&v) * <S as From<usize>>::from(1000);
+            let v2 = basis.project_on_plane_z(&v) * S::from_value(1000);
             points.push(format!(
                 "<circle cx=\"{}\" cy=\"{}\" r=\"{circle_size}\" fill=\"{}\"/> <text x=\"{}\" y=\"{}\" text-anchor=\"middle\" >{pt} </text>
                 ",
@@ -258,13 +258,13 @@ impl<'a, S: Scalar> FaceRef<'a, S> {
             .map(|pt| self.index.vertices.get_point(pt))
             .collect_vec();
         let sum: Vector3<S> = vertices.iter().copied().fold(Vector3::zero(), |a, b| a + b);
-        let center = sum / <S as From<usize>>::from(vertices.len());
+        let center = sum / S::from_value(vertices.len());
         let v = vertices
             .into_iter()
             .max_by(|a, b| {
                 let aa = (*a - center).magnitude_squared();
                 let bb = (*b - center).magnitude_squared();
-                aa.cmp(&bb)
+                aa.partial_cmp(&bb).unwrap_or(std::cmp::Ordering::Equal)
             })
             .expect("Cannot calculate max distance from center");
 

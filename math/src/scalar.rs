@@ -1,7 +1,7 @@
 use core::fmt;
 use std::ops::{AddAssign, Div, Mul, Sub, SubAssign};
 
-use num_traits::{Bounded, Float, One, Pow, Signed, Zero};
+use num_traits::{AsPrimitive, Bounded, Float, FromPrimitive, One, Pow, Signed, ToPrimitive, Zero};
 
 pub trait Scalar:
     Float
@@ -9,18 +9,15 @@ pub trait Scalar:
     + One
     + Bounded
     + Signed
-    + Pow<usize, Output = Self>
-    + Ord
+    + Pow<i32, Output = Self>
     + AddAssign<Self>
     + Sub<Self, Output = Self>
     + SubAssign<Self>
     + Copy
+    + FromPrimitive
+    + ToPrimitive
     + fmt::Debug
     + fmt::Display
-    + Into<usize>
-    + Into<f64>
-    + From<f64>
-    + From<usize>
     + Mul<Self, Output = Self>
     + Div<Self, Output = Self>
     + std::iter::Sum
@@ -35,7 +32,7 @@ pub trait Scalar:
     }
 
     fn pi() -> Self {
-        std::f64::consts::PI.into()
+        Self::from_f64(std::f64::consts::PI).expect("Implement `FromPrimitive` trait")
     }
 
     fn two_pi() -> Self {
@@ -46,14 +43,18 @@ pub trait Scalar:
         Self::one() / Self::two()
     }
 
-    fn from_value<V: Into<Self>>(v: V) -> Self {
-        v.into()
+    fn from_value<V: AsPrimitive<f64>>(v: V) -> Self {
+        let v: f64 = v.as_();
+        Self::from_f64(v).expect("Cannot build float number")
     }
 
-    fn round_dp(&self, point: usize) -> Self {
+    fn round_dp(&self, point: i32) -> Self {
         let pt = Self::ten().pow(point);
         let maxed = *self * pt;
         let rounded = maxed.round();
         rounded / pt
     }
 }
+
+impl Scalar for f64 {}
+impl Scalar for f32 {}

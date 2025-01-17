@@ -3,7 +3,7 @@ use math::ParametricIterator;
 use std::ops::Sub;
 
 use math::{CrossProduct, Tensor, Vector3};
-use num_traits::{One, Pow, Zero};
+use num_traits::{FromPrimitive, One, Pow, Zero};
 
 use crate::{
     get_length::GetLength,
@@ -65,6 +65,7 @@ impl<T: Tensor> GetLength for Curve<T> {
             distance.magnitude()
         } else {
             let mut total = T::Scalar::zero();
+
             for (t, tt) in ParametricIterator::<T::Scalar>::new(10) {
                 let t0 = self.get_t(t);
                 let t1 = self.get_t(tt);
@@ -93,14 +94,15 @@ impl<T: Tensor> UpdateStartEnd for Curve<T> {
 
 pub(crate) fn bernstein<F>(item: usize, of: usize, t: F) -> F
 where
-    F: One + Sub<F, Output = F> + Pow<usize, Output = F> + Copy + fmt::Debug + From<usize>,
+    F: One + Zero + Sub<F, Output = F> + Pow<i32, Output = F> + Copy + fmt::Debug + FromPrimitive,
 {
     let opt = of - 1;
-    let factor: F = (fact(opt) / (fact(item) * fact(opt - item))).into();
+    let factor =
+        F::from_usize(fact(opt) / (fact(item) * fact(opt - item))).unwrap_or_else(Zero::zero);
     let ot = F::one() - t;
     let o_item = opt - item;
 
-    t.pow(item) * ot.pow(o_item) * factor
+    t.pow(item as i32) * ot.pow(o_item as i32) * factor
 }
 
 const fn fact(i: usize) -> usize {
@@ -124,8 +126,10 @@ where
     type Scalar = <T as Tensor>::Scalar;
 
     fn shift_in_plane(mut self, normal: Self::Vector3, amount: <T as Tensor>::Scalar) -> Self {
-        let delta = <T as Tensor>::Scalar::one() / <T as Tensor>::Scalar::from(65535);
-        let half = <T as Tensor>::Scalar::one() / <T as Tensor>::Scalar::from(2);
+        let delta = <T as Tensor>::Scalar::one()
+            / <T as Tensor>::Scalar::from_u16(65535).expect("Convertion error");
+        let half = <T as Tensor>::Scalar::one()
+            / <T as Tensor>::Scalar::from_i8(2).expect("Convertion error");
         let b = self.get_t(<T as Tensor>::Scalar::zero()).get_position();
         let bb = self.get_t(delta).get_position();
         let e = self

@@ -34,8 +34,8 @@ where
 
     pub fn render(&self) -> Vec<Vec<Vector3<F>>> {
         let wf = self.origin.center
-            - self.origin.x() * (self.width / <F as From<usize>>::from(2usize))
-            - self.origin.y() * (self.height / <F as From<usize>>::from(2usize));
+            - self.origin.x() * (self.width / F::from_value(2usize))
+            - self.origin.y() * (self.height / F::from_value(2usize));
 
         ParametricIterator::<F>::new(self.resolution)
             .flat_map(|(s, ss)| {

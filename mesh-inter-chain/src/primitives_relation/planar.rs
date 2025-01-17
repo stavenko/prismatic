@@ -5,7 +5,7 @@ use crate::{
     linear::{line::Line, segment::Segment},
     planar::{plane::Plane, polygon::Polygon},
 };
-use math::{Matrix2, Scalar, Vector2, Vector3};
+use math::{CrossProduct, Matrix2, Scalar, Vector2, Vector3};
 
 use super::relation::Relation;
 
@@ -31,7 +31,7 @@ impl<S: Scalar> Relation<Plane<S>> for Plane<S> {
     type Relate = PlanarRelation<S>;
 
     fn relate(&self, to: &Plane<S>) -> Self::Relate {
-        let dir = self.normal().cross(&to.normal());
+        let dir = self.normal().cross_product(&to.normal());
 
         if dir
             .magnitude_squared()

@@ -264,7 +264,7 @@ fn complex_cut(file_root: PathBuf) -> anyhow::Result<String> {
         polygon.make_mut_ref(&mut index).remove();
     }
 
-    for polygon in index.get_mesh_polygons(cutter_mesh) {
+    for polygon in cutter_mesh.make_ref(&index).all_polygons() {
         polygon.make_mut_ref(&mut index).flip();
     }
 

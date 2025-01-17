@@ -10,7 +10,7 @@ use crate::{
     polygon_basis::PolygonBasis,
     reversable::Reversable,
 };
-use math::{Scalar, Vector3};
+use math::{CrossProduct, Scalar, Vector3};
 
 use super::plane::Plane;
 
@@ -153,7 +153,7 @@ impl<S: Scalar> Polygon<S> {
                 "Cannot calculate plane of polygon, we got repeated points"
             ));
         }
-        let cross = &a.cross(&b);
+        let cross = &a.cross_product(&b);
         //dbg!(cross.magnitude());
         if cross.magnitude().is_zero() {
             return Err(anyhow::anyhow!(
@@ -190,7 +190,7 @@ impl<S: Scalar> Polygon<S> {
         let center = sum / S::from_value(vertices.len());
         let v = vertices.first().ok_or(anyhow!("not a single point"))?;
         let plane_x = (v - center).normalize();
-        let plane_y = plane.normal().cross(&plane_x).normalize();
+        let plane_y = plane.normal().cross_product(&plane_x).normalize();
 
         Ok(PolygonBasis {
             center,

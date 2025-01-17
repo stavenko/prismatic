@@ -3,6 +3,7 @@ name = "mesh-inter-chain"
 version = "0.1.0"
 edition = "2021"
 description="Library to search intersections of several meshes"
+repository="https://github.com/stavenko/mesh-inter-chain"
 
 [dependencies]
 

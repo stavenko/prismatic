@@ -9,7 +9,7 @@ use std::{
 
 use anyhow::anyhow;
 use itertools::{Either, Itertools};
-use math::Scalar;
+use math::{CrossProduct as _, Scalar};
 use num_traits::Zero;
 use rstar::RTree;
 
@@ -92,7 +92,6 @@ where
 
             current_color: 0,
             debug_path: "/tmp/".into(),
-            //default_mesh,
         }
     }
 
@@ -133,13 +132,6 @@ where
     fn get_next_mesh_id(&mut self) -> MeshId {
         self.mesh_counter += 1;
         MeshId(self.mesh_counter)
-    }
-
-    pub fn get_mutable_mesh(&mut self, mesh_id: MeshId) -> MeshRefMut<S> {
-        MeshRefMut {
-            geo_index: self,
-            mesh_id,
-        }
     }
 
     fn collect_seg_chains(&self, mut ribs: Vec<RibId>) -> Vec<Vec<Seg>> {
@@ -251,7 +243,7 @@ where
         })
     }
 
-    pub fn split_face_by_chain(&mut self, chain: Vec<Seg>, face_id: FaceId) -> [FaceId; 2] {
+    fn split_face_by_chain(&mut self, chain: Vec<Seg>, face_id: FaceId) -> [FaceId; 2] {
         let face_ref = self.load_face_ref(face_id);
         let chain = chain.into_iter().map(|s| s.to_ref(self)).collect_vec();
         let chain_last = chain.last().unwrap().to_pt();
@@ -316,7 +308,7 @@ where
         new_ids.try_into().expect("ok")
     }
 
-    pub fn find_first_bridge_point(
+    fn find_first_bridge_point(
         &self,
         chain: &[SegRef<'_, S>],
         face_id: FaceId,
@@ -380,7 +372,7 @@ where
         None
     }
 
-    pub fn find_opposing_bridge_point(
+    fn find_opposing_bridge_point(
         &self,
         chain_pt: PtId,
         chain: &[SegRef<'_, S>],
@@ -448,12 +440,10 @@ where
                     let test = self.vertices.get_point(*p);
                     let test_dir = (test - origin).normalize();
                     let test_dist = (test - origin).magnitude();
-                    // Looks like heuristics, but works for now
-                    let comparable = (test_dir.dot(&best_dir) / test_dist
-                        * S::from_value(100_000_000))
-                    .to_usize();
 
-                    comparable
+                    (test_dir.dot(&best_dir) / test_dist
+                        * S::from_value(100_000_000))
+                    .to_isize()
                 })
             {
                 return Some((chain_pts[ix], p));
@@ -462,7 +452,7 @@ where
         None
     }
 
-    pub fn split_face_by_closed_chain(
+    fn split_face_by_closed_chain(
         &mut self,
         face_id: FaceId,
         mut chain: Vec<Seg>,
@@ -733,7 +723,7 @@ where
         }
     }
 
-    pub fn split_faces_by_orphan_ribs(&mut self) {
+   fn split_faces_by_orphan_ribs(&mut self) {
         while let Some((face_id, cutting_chain, leftoffs)) = self
             .partially_split_faces
             .iter()
@@ -800,7 +790,7 @@ where
         }
     }
 
-    pub(crate) fn split_floating_rib_using_indexed_pts(
+     fn split_floating_rib_using_indexed_pts(
         &mut self,
         pts: &[PtId],
         rib_id: RibId,
@@ -832,7 +822,7 @@ where
 
         new_ids
     }
-    pub(crate) fn split_rib_in_face_using_indexed_pts(
+     fn split_rib_in_face_using_indexed_pts(
         &mut self,
         pts: &[PtId],
         rib_id: RibId,
@@ -917,13 +907,13 @@ where
             ));
         }
 
-        let cross = a.cross(&b);
-        if cross.magnitude().is_zero() {
+        let cross_product = a.cross_product(&b);
+        if cross_product.magnitude().is_zero() {
             return Err(anyhow::anyhow!(
-                "Cannot calculate plane of polygon, cross product have zero length"
+                "Cannot calculate plane of polygon, cross_product product have zero length"
             ));
         }
-        let mut plane = Plane::new_from_normal_and_point(cross.normalize(), u);
+        let mut plane = Plane::new_from_normal_and_point(cross_product.normalize(), u);
         let x = a.normalize();
         let y = b.normalize();
 
@@ -987,7 +977,7 @@ where
         })
     }
 
-    pub fn add_polygon_to_mesh<F>(
+    pub(crate) fn add_polygon_to_mesh<F>(
         &mut self,
         vertices: &[Vector3<F>],
         mesh_id: MeshId,
@@ -1034,157 +1024,6 @@ where
         Ok(())
     }
 
-    /* TODO: REMOVE
-    fn save_polygon(&mut self, polygon: &Polygon, mesh_id: Option<MeshId>) {
-        let aabb = Aabb::from_points(&polygon.vertices);
-        let mesh_id = mesh_id.unwrap_or(self.default_mesh);
-        if polygon
-            .get_segments()
-            .into_iter()
-            .any(|seg| seg.dir().magnitude() < self.input_polygon_min_rib_length)
-        {
-            for s in polygon.get_segments() {
-                let f = s.from;
-                let t = s.to;
-                let m = s.dir().magnitude();
-                println!(
-                    "Segment: {} {} {} --> {} {} {} [{}]",
-                    f.x.round_dp(10),
-                    f.y.round_dp(10),
-                    f.z.round_dp(10),
-                    t.x.round_dp(10),
-                    t.y.round_dp(10),
-                    t.z.round_dp(10),
-                    m
-                );
-            }
-            panic!("Input rib for new polygon is too short");
-        }
-
-        let segments = polygon
-            .get_segments()
-            .into_iter()
-            .map(|s| self.save_segment((s.from, s.to)))
-            .collect_vec();
-
-        let plane = polygon.get_plane();
-
-        let poly = Poly::create(segments.clone(), plane.clone(), aabb);
-        let face = Face::create(segments, plane, aabb);
-
-        let face_id = self.insert_face(face);
-        let poly_id = self.insert_poly(poly).0;
-        if poly_id == 31 {
-            println!("saved new poly in {mesh_id:?}: {poly_id:?}");
-        }
-
-        if let Some(m) = self.meshes.get_mut(&mesh_id) {
-            m.0.push(poly_id);
-        }
-
-        self.unify_ribs(poly_id);
-        self.create_common_ribs(poly_id, mesh_id);
-        self.split_polygons_by_orphan_ribs();
-    }
-
-    pub fn save_segment_splittin_ribs(&mut self, segment: Segment) -> Vec<Seg> {
-        let from = self.insert_point(segment.from);
-        let to = self.insert_point(segment.to);
-
-        if let Some(ribs) = self.pt_to_ribs.get(&from).cloned() {
-            for r in &ribs {
-                let rr = self.get_rib(*r);
-                match rr.relate(&to) {
-                    PointOnLine::On => {
-                        for ps_for_rib in self.rib_to_poly.remove(r).into_iter().flatten() {
-                            self.split_rib_in_poly_using_indexed_pt(to, *r, ps_for_rib);
-                            Self::remove_item_from_index(&mut self.pt_to_ribs, &to, r);
-                            Self::remove_item_from_index(&mut self.pt_to_ribs, &from, r);
-                        }
-                    }
-                    PointOnLine::Outside => {}
-                    PointOnLine::Origin => {}
-                }
-
-                let rr = self.get_rib(*r);
-                for (pt, v) in
-                    [rr.from_pt(), rr.to_pt()].map(|pt| (pt, self.vertices.get_point(pt)))
-                {
-                    match segment.relate(&v) {
-                        PointOnLine::On => {
-                            if pt != from && pt != to {
-                                let mut segs = vec![Seg {
-                                    rib_id: *r,
-                                    dir: if rr.from_pt() == from {
-                                        SegmentDir::Fow
-                                    } else {
-                                        SegmentDir::Rev
-                                    },
-                                }];
-                                segs.extend(self.save_segment_splittin_ribs(Segment {
-                                    from: v,
-                                    to: segment.to,
-                                }));
-
-                                return segs;
-                            }
-                        }
-                        PointOnLine::Outside => {}
-                        PointOnLine::Origin => {}
-                    }
-                }
-            }
-        }
-
-        if let Some(ribs) = self.pt_to_ribs.get(&to).cloned() {
-            for r in &ribs {
-                let rr = self.get_rib(*r);
-
-                match rr.relate(&from) {
-                    PointOnLine::On => {
-                        for ps_for_rib in self.rib_to_poly.remove(r).into_iter().flatten() {
-                            self.split_rib_in_poly_using_indexed_pt(from, *r, ps_for_rib);
-                            Self::remove_item_from_index(&mut self.pt_to_ribs, &to, r);
-                            Self::remove_item_from_index(&mut self.pt_to_ribs, &from, r);
-                        }
-                    }
-                    PointOnLine::Outside => {}
-                    PointOnLine::Origin => {}
-                }
-
-                let rr = self.get_rib(*r);
-                for (pt, v) in
-                    [rr.from_pt(), rr.to_pt()].map(|pt| (pt, self.vertices.get_point(pt)))
-                {
-                    match segment.relate(&v) {
-                        PointOnLine::On => {
-                            if pt != from && pt != to {
-                                let mut segs = vec![Seg {
-                                    rib_id: *r,
-                                    dir: if rr.from_pt() == from {
-                                        SegmentDir::Fow
-                                    } else {
-                                        SegmentDir::Rev
-                                    },
-                                }];
-                                segs.extend(self.save_segment_splittin_ribs(Segment {
-                                    to: v,
-                                    from: segment.from,
-                                }));
-
-                                return segs;
-                            }
-                        }
-                        PointOnLine::Outside => {}
-                        PointOnLine::Origin => {}
-                    }
-                }
-            }
-        }
-
-        vec![self.save_segment((segment.from, segment.to))]
-    }
-    */
 
     pub fn save_segment(
         &mut self,
@@ -1919,7 +1758,7 @@ where
         test: Vector3<S>,
     ) -> bool {
         let x = one;
-        let y = plane_normal.cross(&one).normalize();
+        let y = plane_normal.cross_product(&one).normalize();
 
         let v = two;
 
@@ -1987,7 +1826,7 @@ where
     pub fn detect_poly_dir(&self, rib_id: RibId, poly: UnrefPoly) -> Vector3<S> {
         let rib_dir = rib_id.make_ref(self).dir();
         let plane_dir = poly.make_ref(self).normal();
-        let in_poly_dir = rib_dir.cross(&plane_dir).normalize();
+        let in_poly_dir = rib_dir.cross_product(&plane_dir).normalize();
         let line_straight = Line {
             origin: rib_id.make_ref(self).middle(),
             dir: in_poly_dir,
@@ -2156,19 +1995,19 @@ where
             }
         }
         let _t = SystemTime::now();
-        let visited = self.spread_visited_around_2(&ribs, of_mesh, visited);
-        let result = visited
+        let visited = self.spread_visited_around(&ribs, of_mesh, visited);
+        
+        visited
             .into_iter()
             .filter(|(_, r)| *r == filter)
             .map(|(poly_id, _)| UnrefPoly {
                 mesh_id: of_mesh,
                 poly_id,
             })
-            .collect_vec();
-        result
+            .collect_vec()
     }
 
-    fn spread_visited_around_2(
+    fn spread_visited_around(
         &self,
         common_ribs: &HashSet<RibId>,
         of_mesh: MeshId,
@@ -2280,7 +2119,7 @@ where
         None
     }
 
-    pub fn get_ribs_with_root_parent(&self, rib_id: RibId) -> Vec<RibId> {
+    pub(crate) fn get_ribs_with_root_parent(&self, rib_id: RibId) -> Vec<RibId> {
         let mut collected = Vec::new();
 
         let mut to_check = vec![rib_id];
@@ -2296,6 +2135,9 @@ where
         collected
     }
 
+    /// Debug method - children of some face_id. Every split has it`s history and possibility to
+    /// trace cuts. If input face ever existed and have been cutted - the list of currently
+    /// available  faces will be returned.
     pub fn get_face_with_root_parent(&self, face_id: FaceId) -> Vec<FaceId> {
         let mut collected = Vec::new();
 
@@ -2312,6 +2154,9 @@ where
         collected
     }
 
+    /// Debug method - allows to parent of given face. If this face have been splitted, returns
+    /// `Some(face_id)` 
+    /// If input face is not created by face splitting - then function returns None.
     pub fn find_splitted_face_parent(&self, face_id: FaceId) -> Option<FaceId> {
         self.face_splits
             .iter()
@@ -2479,8 +2324,8 @@ where
                         let base = self.vertices.get_point(*hp);
                         let f = from.to() - base;
                         let t = to.from() - base;
-                        let norm = f.normalize().cross(&line.dir).normalize();
-                        let perpendicular_in_plane = norm.cross(&line.dir).normalize();
+                        let norm = f.normalize().cross_product(&line.dir).normalize();
+                        let perpendicular_in_plane = norm.cross_product(&line.dir).normalize();
                         let fd = perpendicular_in_plane.dot(&f);
                         let td = perpendicular_in_plane.dot(&t);
 
@@ -2506,8 +2351,8 @@ where
                     (Some(from), Some(to)) => {
                         let f = from.to() - from.from();
                         let t = to.from() - to.to();
-                        let norm = f.normalize().cross(&line.dir).normalize();
-                        let perpendicular_in_plane = norm.cross(&line.dir).normalize();
+                        let norm = f.normalize().cross_product(&line.dir).normalize();
+                        let perpendicular_in_plane = norm.cross_product(&line.dir).normalize();
                         let fd = perpendicular_in_plane.dot(&f);
                         let td = perpendicular_in_plane.dot(&t);
 
@@ -2551,9 +2396,6 @@ where
         )
     }
 
-    /// Check if line from center of segment and direction of segment dir crossed with plane normal
-    /// intersects any other segment in polygon.
-    /// If intersects one of them in positive direction of line - I assume_
     fn rib_inside_face(&self, rib_id: RibId, face_id: FaceId) -> bool {
         let poly_plane = self.faces[&face_id].plane().clone();
 
@@ -2564,45 +2406,26 @@ where
             .make_ref(self)
             .dir()
             .normalize()
-            .cross(&poly_plane.normal())
+            .cross_product(&poly_plane.normal())
             .normalize();
 
         let line = Line {
             origin: rib_from.lerp(&rib_to, S::half()),
             dir: line_normal_in_poly_plane,
         };
+
         let vertex_pulling = num_traits::Float::min(
             RibRef::magnitude(&rib_id.make_ref(self)).div(S::two()),
             S::one() / S::from_value(1000),
         );
-        if face_id.0 == 2482 && rib_id == 3846 {
-            println!("select vp: {vertex_pulling:?}");
-        }
 
         let total_intersects = self.collect_line_face_intersections(
             line,
             face_id,
             vertex_pulling * vertex_pulling,
-            face_id.0 == 2482 && rib_id == 3846,
+            false,
         );
-        if face_id.0 == 2482 && rib_id == 3846 {
-            println!("Counted intersecions for 3846 and 2482 {total_intersects}");
-        }
 
-        /*
-        let is_i = if face_pts.contains(&rib_id.make_ref(self).from_pt())
-            || face_pts.contains(&rib_id.make_ref(self).to_pt())
-        {
-            println!(
-                "face border contains some point of rib => need to check, if other point is inside {total_intersects}"
-            );
-            (total_intersects.saturating_sub(1)) % 2 != 0
-        } else {
-            println!("All rib points somewhere in space");
-
-            total_intersects % 2 != 0
-        };
-        */
         total_intersects % 2 != 0
     }
 
@@ -2612,17 +2435,6 @@ where
             .is_some_and(|f| matches!(f.is_opposite_face(&face), FaceToFaceRelation::Opposite))
     }
 
-    pub fn get_mesh_polygons(&self, mesh_id: MeshId) -> Vec<UnrefPoly> {
-        self.meshes
-            .get(&mesh_id)
-            .iter()
-            .flat_map(|mesh| {
-                mesh.polies
-                    .keys()
-                    .map(|&poly_id| UnrefPoly { mesh_id, poly_id })
-            })
-            .collect()
-    }
 
     pub(crate) fn load_polygon_ref(&self, mesh_id: MeshId, ix: PolyId) -> PolyRef<S> {
         PolyRef {
@@ -2632,6 +2444,10 @@ where
         }
     }
 
+    /// Create new mesh in index. MeshId could be used to "hydrate" it with index to `MeshRef` or
+    /// `MeshRefMut`.
+    /// `MeshRef` could be used to query objects from index - polygons, for example 
+    /// `MeshRefMut` Can mutate mesh and acquires mutable access to index.
     pub fn new_mesh(&mut self) -> MeshId {
         let mesh_id = self.get_next_mesh_id();
         self.meshes.insert(mesh_id, Mesh::default());

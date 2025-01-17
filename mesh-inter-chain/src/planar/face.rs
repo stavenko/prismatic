@@ -1,4 +1,4 @@
-use math::{Scalar, Vector3};
+use math::{CrossProduct, Scalar, Vector3};
 
 use super::plane::Plane;
 
@@ -27,7 +27,7 @@ impl<S: Scalar> Face<S> {
         let a = *v - *u;
         let b = *w - *u;
 
-        let cross = a.cross(&b);
+        let cross = a.cross_product(&b);
 
         if cross.magnitude_squared().is_zero() {
             dbg!(a.normalize().dot(&b.normalize()));

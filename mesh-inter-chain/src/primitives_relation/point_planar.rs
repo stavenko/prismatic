@@ -3,7 +3,7 @@ use crate::{
     linear::{line::Line, ray::Ray, segment::Segment},
     planar::{plane::Plane, polygon::Polygon},
 };
-use math::{Scalar, Vector3};
+use math::{CrossProduct, Scalar, Vector3};
 
 use super::{
     linear::{LinearIntersection, LinearRelation, NORMAL_DOT_ROUNDING},
@@ -98,8 +98,8 @@ impl<S: Scalar> Relation<Vector3<S>> for Polygon<S> {
                             let p1 = s1.to - ray.origin;
                             let p2 = s2.from - ray.origin;
 
-                            let c1 = ray.dir.cross(&p1);
-                            let c2 = ray.dir.cross(&p2);
+                            let c1 = ray.dir.cross_product(&p1);
+                            let c2 = ray.dir.cross_product(&p2);
 
                             if c1.dot(&c2).is_negative() {
                                 edges_crossed += 1;

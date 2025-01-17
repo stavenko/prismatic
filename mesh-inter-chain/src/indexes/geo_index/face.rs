@@ -9,7 +9,7 @@ use crate::{
     planar::plane::Plane,
     polygon_basis::PolygonBasis,
 };
-use math::{Scalar, Vector3};
+use math::{CrossProduct, Scalar, Vector3};
 
 use super::{
     geo_object::{GeoObject, UnRef},
@@ -271,7 +271,7 @@ impl<'a, S: Scalar> FaceRef<'a, S> {
         let distance = (v - center).magnitude();
 
         let plane_x = (v - center) / distance;
-        let plane_y = plane.normal().cross(&plane_x).normalize();
+        let plane_y = plane.normal().cross_product(&plane_x).normalize();
 
         PolygonBasis {
             center,

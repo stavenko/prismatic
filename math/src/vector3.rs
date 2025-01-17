@@ -72,14 +72,6 @@ impl<T: Scalar> Vector3<T> {
         self.magnitude_squared().sqrt()
     }
 
-    pub fn cross(&self, rhs: &Vector3<T>) -> Self {
-        Self {
-            x: self.y * rhs.z - self.z * rhs.y,
-            y: self.z * rhs.x - self.x * rhs.z,
-            z: self.x * rhs.y - self.y * rhs.x,
-        }
-    }
-
     pub fn lerp(&self, to: &Self, t: T) -> Self {
         *self * (T::one() - t) + *to * t
     }

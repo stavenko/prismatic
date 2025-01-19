@@ -4,8 +4,7 @@ use math::ParametricIterator;
 use math::Scalar;
 
 use math::Vector3;
-use mesh_inter_chain::geometry::GeometryDyn;
-use mesh_inter_chain::indexes::geo_index::mesh::MeshRefMut;
+use prismatic::{geometry::GeometryDyn, indexes::geo_index::mesh::MeshRefMut};
 
 pub struct Plane<F: Scalar> {
     origin: BaseOrigin<F>,

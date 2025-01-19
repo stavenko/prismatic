@@ -7,5 +7,5 @@ edition = "2021"
 anyhow = "1.0.95"
 itertools = "0.14.0"
 math = { version = "0.1.0", path = "../math" }
-mesh-inter-chain = { version = "0.1.0", path = "../mesh-inter-chain" }
+prismatic = { version = "0.1.0", path = "../prismatic" }
 num-traits = "0.2.19"

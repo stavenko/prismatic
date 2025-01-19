@@ -1,9 +1,11 @@
 [package]
-name = "mesh-inter-chain"
+name = "prismatic"
 version = "0.1.0"
 edition = "2021"
 description="Library to search intersections of several meshes"
-repository="https://github.com/stavenko/mesh-inter-chain"
+repository="https://github.com/stavenko/prismatic"
+license="MIT"
+keywords=["mesh-boolean", "cad", "3D"]
 
 [dependencies]
 

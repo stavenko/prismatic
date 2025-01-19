@@ -1,7 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
-  "mesh-inter-chain" ,
+  "prismatic" ,
   "math",
   "path",
  "shapes",

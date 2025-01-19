@@ -3,7 +3,7 @@ use std::{fs, path::PathBuf};
 
 use clap::Parser;
 use math::{BaseOrigin, Quaternion, Vector3};
-use mesh_inter_chain::{
+use prismatic::{
     geometry::GeometryDyn,
     indexes::{
         aabb::Aabb,

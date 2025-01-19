@@ -419,31 +419,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "78ca9ab1a0babb1e7d5695e3530886289c18cf2f87ec19a575a0abdce112e3a3"
 
 [[package]]
-name = "mesh-inter-chain"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "approx",
- "assert_matches",
- "cdt",
- "clap",
- "itertools 0.12.1",
- "math",
- "num-traits",
- "path",
- "rand",
- "rstar",
- "rust_decimal",
- "rust_decimal_macros",
- "seq-macro",
- "shapes",
- "simba 0.8.1",
- "stl_io",
- "tap",
- "uuid",
-]
-
-[[package]]
 name = "num-complex"
 version = "0.4.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -489,6 +464,31 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "77957b295656769bb8ad2b6a6b09d897d94f05c41b069aede1fcdaa675eaea04"
 dependencies = [
  "zerocopy",
+]
+
+[[package]]
+name = "prismatic"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "approx",
+ "assert_matches",
+ "cdt",
+ "clap",
+ "itertools 0.12.1",
+ "math",
+ "num-traits",
+ "path",
+ "rand",
+ "rstar",
+ "rust_decimal",
+ "rust_decimal_macros",
+ "seq-macro",
+ "shapes",
+ "simba 0.8.1",
+ "stl_io",
+ "tap",
+ "uuid",
 ]
 
 [[package]]
@@ -715,8 +715,8 @@ dependencies = [
  "anyhow",
  "itertools 0.14.0",
  "math",
- "mesh-inter-chain",
  "num-traits",
+ "prismatic",
 ]
 
 [[package]]

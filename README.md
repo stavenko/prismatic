@@ -1,4 +1,4 @@
-# mesh-inter-chain 
+# Polygonal Region Intersection and Selection for Mesh Analysis and Topological Intersection Calculations.
 
 This is a pure Rust library to find intersections of several meshes. Each mesh
 represented as list of polygons. Mesh could be closed (like `sphere` or `cube`),

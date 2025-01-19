@@ -1,7 +1,7 @@
 use crate::{
+    constants::STABILITY_ROUNDING,
     indexes::{
         geo_index::{rib::RibRef, seg::SegRef},
-        quadtree::STABILITY_ROUNDING,
         vertex_index::PtId,
     },
     linear::{line::Line, ray::Ray, segment::Segment},

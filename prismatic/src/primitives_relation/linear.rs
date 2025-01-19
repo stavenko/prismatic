@@ -1,5 +1,6 @@
 use crate::{
-    indexes::{geo_index::seg::SegRef, quadtree::STABILITY_ROUNDING},
+    constants::STABILITY_ROUNDING,
+    indexes::geo_index::seg::SegRef,
     linear::{line::Line, ray::Ray, segment::Segment},
 };
 use math::{Matrix2, Scalar, Vector2, Vector3};

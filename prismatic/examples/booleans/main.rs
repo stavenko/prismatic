@@ -7,7 +7,10 @@ use prismatic::{
     geometry::GeometryDyn,
     indexes::{
         aabb::Aabb,
-        geo_index::{geo_object::GeoObject, index::GeoIndex},
+        geo_index::{
+            geo_object::GeoObject,
+            index::{GeoIndex, PolygonFilter},
+        },
     },
 };
 
@@ -142,26 +145,10 @@ fn overlap_touching_edge(file_root: PathBuf) -> anyhow::Result<String> {
     bigger_box.polygonize(big.make_mut_ref(&mut index), 0)?;
 
     let remove = [
-        index.select_polygons(
-            small,
-            big,
-            mesh_inter_chain::indexes::geo_index::index::PolygonFilter::Front,
-        ),
-        index.select_polygons(
-            big,
-            small,
-            mesh_inter_chain::indexes::geo_index::index::PolygonFilter::Back,
-        ),
-        index.select_polygons(
-            big,
-            small,
-            mesh_inter_chain::indexes::geo_index::index::PolygonFilter::Shared,
-        ),
-        index.select_polygons(
-            small,
-            big,
-            mesh_inter_chain::indexes::geo_index::index::PolygonFilter::Shared,
-        ),
+        index.select_polygons(small, big, PolygonFilter::Front),
+        index.select_polygons(big, small, PolygonFilter::Back),
+        index.select_polygons(big, small, PolygonFilter::Shared),
+        index.select_polygons(small, big, PolygonFilter::Shared),
     ]
     .concat();
 
@@ -247,16 +234,8 @@ fn complex_cut(file_root: PathBuf) -> anyhow::Result<String> {
     cutter.polygonize(cutter_mesh.make_mut_ref(&mut index), 0)?;
 
     let remove = [
-        index.select_polygons(
-            cutter_mesh,
-            platform_mesh,
-            mesh_inter_chain::indexes::geo_index::index::PolygonFilter::Front,
-        ),
-        index.select_polygons(
-            platform_mesh,
-            cutter_mesh,
-            mesh_inter_chain::indexes::geo_index::index::PolygonFilter::Back,
-        ),
+        index.select_polygons(cutter_mesh, platform_mesh, PolygonFilter::Front),
+        index.select_polygons(platform_mesh, cutter_mesh, PolygonFilter::Back),
     ]
     .concat();
 
@@ -276,16 +255,8 @@ fn complex_cut(file_root: PathBuf) -> anyhow::Result<String> {
     matter.polygonize(matter_mesh.make_mut_ref(&mut index), 0)?;
 
     let remove = [
-        index.select_polygons(
-            matter_mesh,
-            platform_mesh,
-            mesh_inter_chain::indexes::geo_index::index::PolygonFilter::Back,
-        ),
-        index.select_polygons(
-            platform_mesh,
-            matter_mesh,
-            mesh_inter_chain::indexes::geo_index::index::PolygonFilter::Back,
-        ),
+        index.select_polygons(matter_mesh, platform_mesh, PolygonFilter::Back),
+        index.select_polygons(platform_mesh, matter_mesh, PolygonFilter::Back),
     ]
     .concat();
 
@@ -364,16 +335,8 @@ fn two_identical_boxes_with_overlapped_side_and_rotated(
     Rect::centered(x_basis_two, 1.0, 1.0, 1.0).polygonize(box_two.make_mut_ref(&mut index), 0)?;
 
     let remove = [
-        index.select_polygons(
-            box_one,
-            box_two,
-            mesh_inter_chain::indexes::geo_index::index::PolygonFilter::Back,
-        ),
-        index.select_polygons(
-            box_one,
-            box_two,
-            mesh_inter_chain::indexes::geo_index::index::PolygonFilter::Back,
-        ),
+        index.select_polygons(box_one, box_two, PolygonFilter::Back),
+        index.select_polygons(box_one, box_two, PolygonFilter::Back),
     ]
     .concat();
 
@@ -409,16 +372,8 @@ fn two_identical_boxes_one_with_one_common_side_rotated(
     Rect::centered(x_basis_two, 1.0, 1.0, 1.0).polygonize(box_two.make_mut_ref(&mut index), 0)?;
 
     let remove = [
-        index.select_polygons(
-            box_one,
-            box_two,
-            mesh_inter_chain::indexes::geo_index::index::PolygonFilter::Back,
-        ),
-        index.select_polygons(
-            box_one,
-            box_two,
-            mesh_inter_chain::indexes::geo_index::index::PolygonFilter::Back,
-        ),
+        index.select_polygons(box_one, box_two, PolygonFilter::Back),
+        index.select_polygons(box_one, box_two, PolygonFilter::Back),
     ]
     .concat();
 
@@ -449,16 +404,8 @@ fn two_identical_boxes_one_with_one_common_side(file_root: PathBuf) -> anyhow::R
     Rect::centered(x_basis_two, 1.0, 1.0, 1.0).polygonize(box_two.make_mut_ref(&mut index), 0)?;
 
     let remove = [
-        index.select_polygons(
-            box_one,
-            box_two,
-            mesh_inter_chain::indexes::geo_index::index::PolygonFilter::Back,
-        ),
-        index.select_polygons(
-            box_one,
-            box_two,
-            mesh_inter_chain::indexes::geo_index::index::PolygonFilter::Back,
-        ),
+        index.select_polygons(box_one, box_two, PolygonFilter::Back),
+        index.select_polygons(box_one, box_two, PolygonFilter::Back),
     ]
     .concat();
 
@@ -490,16 +437,8 @@ fn two_identical_boxes_one_with_overlap(file_root: PathBuf) -> anyhow::Result<St
     Rect::centered(x_basis_two, 1.0, 1.0, 1.0).polygonize(box_two.make_mut_ref(&mut index), 0)?;
 
     let remove = [
-        index.select_polygons(
-            box_one,
-            box_two,
-            mesh_inter_chain::indexes::geo_index::index::PolygonFilter::Back,
-        ),
-        index.select_polygons(
-            box_one,
-            box_two,
-            mesh_inter_chain::indexes::geo_index::index::PolygonFilter::Back,
-        ),
+        index.select_polygons(box_one, box_two, PolygonFilter::Back),
+        index.select_polygons(box_one, box_two, PolygonFilter::Back),
     ]
     .concat();
 
@@ -531,16 +470,8 @@ fn two_identical_boxes_one_shifted_in_plane(file_root: PathBuf) -> anyhow::Resul
     Rect::centered(x_basis_two, 1.0, 1.0, 1.0).polygonize(box_two.make_mut_ref(&mut index), 0)?;
 
     let remove = [
-        index.select_polygons(
-            box_one,
-            box_two,
-            mesh_inter_chain::indexes::geo_index::index::PolygonFilter::Back,
-        ),
-        index.select_polygons(
-            box_one,
-            box_two,
-            mesh_inter_chain::indexes::geo_index::index::PolygonFilter::Back,
-        ),
+        index.select_polygons(box_one, box_two, PolygonFilter::Back),
+        index.select_polygons(box_one, box_two, PolygonFilter::Back),
     ]
     .concat();
 
@@ -572,16 +503,8 @@ fn two_identical_boxes_one_shifted_in_space(file_root: PathBuf) -> anyhow::Resul
     Rect::centered(x_basis_two, 1.0, 1.0, 1.0).polygonize(box_two.make_mut_ref(&mut index), 0)?;
 
     let remove = [
-        index.select_polygons(
-            box_one,
-            box_two,
-            mesh_inter_chain::indexes::geo_index::index::PolygonFilter::Back,
-        ),
-        index.select_polygons(
-            box_one,
-            box_two,
-            mesh_inter_chain::indexes::geo_index::index::PolygonFilter::Back,
-        ),
+        index.select_polygons(box_one, box_two, PolygonFilter::Back),
+        index.select_polygons(box_one, box_two, PolygonFilter::Back),
     ]
     .concat();
 
@@ -612,16 +535,8 @@ fn smaller_box_cutted_by_bigger(file_root: PathBuf) -> anyhow::Result<String> {
     Rect::centered(x_basis_two, 2.5, 2.5, 0.5).polygonize(box_two.make_mut_ref(&mut index), 0)?;
 
     let remove = [
-        index.select_polygons(
-            box_one,
-            box_two,
-            mesh_inter_chain::indexes::geo_index::index::PolygonFilter::Back,
-        ),
-        index.select_polygons(
-            box_two,
-            box_one,
-            mesh_inter_chain::indexes::geo_index::index::PolygonFilter::Front,
-        ),
+        index.select_polygons(box_one, box_two, PolygonFilter::Back),
+        index.select_polygons(box_two, box_one, PolygonFilter::Front),
     ]
     .concat();
 
@@ -655,16 +570,8 @@ fn smaller_box_cutted_by_longer(file_root: PathBuf) -> anyhow::Result<String> {
     Rect::centered(x_basis_two, 0.25, 0.25, 3.5).polygonize(box_two.make_mut_ref(&mut index), 0)?;
 
     let remove = [
-        index.select_polygons(
-            box_one,
-            box_two,
-            mesh_inter_chain::indexes::geo_index::index::PolygonFilter::Back,
-        ),
-        index.select_polygons(
-            box_two,
-            box_one,
-            mesh_inter_chain::indexes::geo_index::index::PolygonFilter::Front,
-        ),
+        index.select_polygons(box_one, box_two, PolygonFilter::Back),
+        index.select_polygons(box_two, box_one, PolygonFilter::Front),
     ]
     .concat();
 

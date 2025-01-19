@@ -5,7 +5,7 @@ use anyhow::anyhow;
 use num_traits::Zero;
 
 use crate::{
-    indexes::quadtree::STABILITY_ROUNDING,
+    constants::STABILITY_ROUNDING,
     linear::{segment::Segment, segment2d::Segment2D},
     polygon_basis::PolygonBasis,
     reversable::Reversable,

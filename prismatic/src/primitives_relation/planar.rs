@@ -1,7 +1,7 @@
 use num_traits::Zero;
 
 use crate::{
-    indexes::quadtree::STABILITY_ROUNDING,
+    constants::STABILITY_ROUNDING,
     linear::{line::Line, segment::Segment},
     planar::{plane::Plane, polygon::Polygon},
 };

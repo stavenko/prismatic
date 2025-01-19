@@ -2,7 +2,7 @@ use std::fmt;
 
 use math::{Scalar, Vector3};
 
-use crate::indexes::quadtree::STABILITY_ROUNDING;
+use crate::constants::STABILITY_ROUNDING;
 
 #[derive(Clone, Eq, PartialOrd)]
 pub struct Plane<S: Scalar> {

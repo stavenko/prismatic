@@ -42,8 +42,8 @@ impl<'a, S: Scalar> PolyRef<'a, S> {
             if ix <= 2 {
                 items.push(format!(
                     "<circle cx=\"{}\" cy=\"{}\" r=\"0.08\" fill=\"{}\"/> ",
-                    vv.x.round(),
-                    vv.y.round(),
+                    vv.x.round_dp(2),
+                    vv.y.round_dp(2),
                     colors[ix],
                 ))
             }

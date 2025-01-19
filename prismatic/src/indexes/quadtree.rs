@@ -3,7 +3,8 @@ use core::f64;
 use num_traits::Zero;
 
 use math::{Scalar, Vector2};
-pub const STABILITY_ROUNDING: i32 = 14;
+
+use crate::constants::STABILITY_ROUNDING;
 
 #[derive(Debug)]
 pub enum QuadtreeContent<S> {

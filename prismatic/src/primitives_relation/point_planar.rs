@@ -1,5 +1,5 @@
 use crate::{
-    indexes::quadtree::STABILITY_ROUNDING,
+    constants::STABILITY_ROUNDING,
     linear::{line::Line, ray::Ray, segment::Segment},
     planar::{plane::Plane, polygon::Polygon},
 };

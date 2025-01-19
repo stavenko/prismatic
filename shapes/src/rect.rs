@@ -1,5 +1,5 @@
 use math::{BaseOrigin, Scalar, Vector3};
-use mesh_inter_chain::{geometry::GeometryDyn, indexes::geo_index::mesh::MeshRefMut};
+use prismatic::{geometry::GeometryDyn, indexes::geo_index::mesh::MeshRefMut};
 
 pub struct Rect<S: Scalar> {
     width: S,

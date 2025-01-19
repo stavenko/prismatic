@@ -207,7 +207,7 @@ impl<'a, S: Scalar> FaceRef<'a, S> {
         height += circle_size * S::from_value(2);
         let aspect = width / height;
         let img_height = img_width / aspect;
-        let font = (circle_size * S::from_value(0.7)).round();
+        let font = (circle_size * S::from_value(0.7)).round_dp(2);
 
         items.push(format!("<svg viewBox=\" {left} {top} {width} {height}\" xmlns=\"http://www.w3.org/2000/svg\" width=\"{img_width}\" height=\"{img_height}\">"));
         items.push(format!(

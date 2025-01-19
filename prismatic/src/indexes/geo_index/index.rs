@@ -34,7 +34,7 @@ use super::poly_rtree::FaceRtreeRecord;
 use super::rib::RibRef;
 use super::seg::SegmentRef;
 use super::{
-    mesh::{MeshId, MeshRef, MeshRefMut},
+    mesh::{MeshId, MeshRef},
     rib::{Rib, RibId},
     seg::{Seg, SegmentDir},
 };

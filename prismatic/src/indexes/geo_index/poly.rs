@@ -73,7 +73,7 @@ impl<'a, S: Scalar> PolyRef<'a, S> {
         let mut path = Vec::new();
 
         let mut aabb = Vec::new();
-        let mut min_distance_betnween_points = <S as Bounded>::max_value();
+        let mut min_distance_between_points = <S as Bounded>::max_value();
 
         for seg in self.segments() {
             let pt = seg.from_pt();
@@ -83,7 +83,7 @@ impl<'a, S: Scalar> PolyRef<'a, S> {
             let v2 = basis.project_on_plane_z(&v) * S::from_value(1000);
             let to_v2 = basis.project_on_plane_z(&to) * S::from_value(1000);
             let d = (to_v2 - v2).magnitude();
-            min_distance_betnween_points = num_traits::Float::min(min_distance_betnween_points, d);
+            min_distance_between_points = num_traits::Float::min(min_distance_between_points, d);
             //let vv = basis.project_on_plane_z(v);
             let v3 = Vector3::new(v2.x, v2.y, S::zero());
             aabb.push(v3);
@@ -92,7 +92,7 @@ impl<'a, S: Scalar> PolyRef<'a, S> {
         let aabb = Aabb::from_points(&aabb);
         let mut width = aabb.max.x - aabb.min.x;
         let mut height = aabb.max.y - aabb.min.y;
-        let circle_size: S = min_distance_betnween_points * S::from_value(4);
+        let circle_size: S = min_distance_between_points * S::from_value(4);
         let top = aabb.min.y - (circle_size / S::from_value(2));
         let left = aabb.min.x - (circle_size / S::from_value(2));
         width += circle_size * S::from_value(2);

@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 use std::path::PathBuf;
 use std::time::SystemTime;
 use std::{
@@ -45,7 +45,7 @@ pub struct GeoIndex<S: Scalar> {
     pub(super) face_index: RTree<FaceRtreeRecord<S>>,
     pub(super) ribs: BTreeMap<RibId, Rib>,
     pub(super) faces: BTreeMap<FaceId, Face<S>>,
-    pub(super) meshes: BTreeMap<MeshId, Mesh>,
+    pub(super) meshes: HashMap<MeshId, Mesh>,
     pub(super) pt_to_ribs: BTreeMap<PtId, Vec<RibId>>,
     pub(super) rib_to_face: BTreeMap<RibId, Vec<FaceId>>,
     pub(super) partially_split_faces: BTreeMap<FaceId, Vec<RibId>>,
@@ -71,7 +71,7 @@ where
         let vertices = VertexIndex::new(aabb);
 
         Self {
-            meshes: BTreeMap::default(),
+            meshes: Default::default(),
             vertices,
             face_index: Default::default(),
             ribs: Default::default(),

@@ -35,9 +35,18 @@ impl From<usize> for FaceId {
     }
 }
 
+/// Struct, which encodes possible relation between two faces:
+/// Faces encoded as a some number of segments.
+/// Each face must be closed segment loop, but we also want to be sure, that face, which contains
+/// segments [a, b, c] and face with segments [c,a,b] - is the same face.
 pub(crate) enum FaceToFaceRelation {
+    /// Face have same segments - but it can have them starting from different segment.
     Same,
+
+    /// Face have save segments - but reversed in order
     Opposite,
+
+    /// Face is totally different.
     Different,
 }
 
@@ -76,14 +85,6 @@ impl<S: Scalar> Face<S> {
 
     pub(crate) fn create(segments: Vec<Seg>, plane: Plane<S>, aabb: Aabb<S>) -> Self {
         let ribs = segments.iter().map(|s| s.rib_id).sorted().collect_vec();
-        if ribs.contains(&RibId(645))
-            && ribs.contains(&RibId(657))
-            //&& ribs.contains(&RibId(653))
-            && ribs.contains(&RibId(654))
-            && ribs.contains(&RibId(659))
-        {
-            println!("CREATE ~~~~",);
-        }
 
         Self {
             segments,

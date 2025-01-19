@@ -1,9 +1,8 @@
-use std::{collections::HashMap, ops::Deref};
+use std::collections::HashMap;
 
 use itertools::Itertools;
 use math::Scalar;
 
-// use crate::decimal::Dec;
 use math::Vector3;
 
 use super::{
@@ -22,9 +21,6 @@ pub struct Mesh {
 impl Mesh {
     pub(crate) fn add(&mut self, poly: Poly) -> PolyId {
         let poly_id = PolyId(self.poly_counter);
-        if poly.face_id.0 == 2493 || poly.face_id.0 == 2494 {
-            println!("  ...{poly_id:?} ");
-        }
         self.poly_counter += 1;
         self.polies.insert(poly_id, poly);
         poly_id
@@ -40,18 +36,11 @@ impl PartialEq<usize> for MeshId {
     }
 }
 
+/// Immutable reference to mesh item in index.
 #[derive(Debug, Clone)]
 pub struct MeshRef<'a, S: Scalar> {
     pub(super) geo_index: &'a GeoIndex<S>,
     pub(super) mesh_id: MeshId,
-}
-
-impl<S: Scalar> Deref for MeshRef<'_, S> {
-    type Target = MeshId;
-
-    fn deref(&self) -> &Self::Target {
-        &self.mesh_id
-    }
 }
 
 impl<'a, S: Scalar> MeshRef<'a, S> {

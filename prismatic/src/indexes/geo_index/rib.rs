@@ -34,7 +34,7 @@ impl<S: Scalar> fmt::Display for RibRef<'_, S> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "{:?} {:?} -> {:?}",
+            "[{:?}] {:?} -> {:?}",
             self.rib_id,
             self.from_pt(),
             self.to_pt(),

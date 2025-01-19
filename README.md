@@ -23,9 +23,9 @@ operations, which are possible with this library.
 
 ## Terminology
 
-**Mesh** - collection of polygons. Could be closed, or none-closed.
-**Polygon** - 2D object in space, which have **Face** and direction.
-**Face** - ordered list of **segments**. Closed chain of segments.
-**Segment** - Rib with direction
-**Rib** - Item, consisting of two points.
-**Point** - Indexed vector in 3D space, 
+**Mesh** - collection of polygons. Could be closed, or none-closed.\
+**Polygon** - 2D object in space, which have **Face** and direction.\
+**Face** - ordered list of **segments**. Closed chain of segments.\
+**Segment** - Rib with direction\
+**Rib** - Item, consisting of two points.\
+**Point** - Indexed vector in 3D space, \

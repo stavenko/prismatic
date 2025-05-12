@@ -2,7 +2,7 @@ use core::fmt;
 use std::{
     fmt::Display,
     iter::Sum,
-    ops::{Add, AddAssign, Div, Mul, Neg, Sub, SubAssign},
+    ops::{Add, AddAssign, Div, Mul, MulAssign, Neg, Sub, SubAssign},
 };
 
 use num_traits::{One, Zero};
@@ -270,6 +270,28 @@ where
             y: self.y * rhs,
             z: self.z * rhs,
         }
+    }
+}
+
+impl<T> MulAssign for Vector3<T>
+where
+    T: Scalar,
+{
+    fn mul_assign(&mut self, rhs: Self) {
+        self.x *= rhs.x;
+        self.y *= rhs.y;
+        self.z *= rhs.z;
+    }
+}
+
+impl<T> MulAssign<T> for Vector3<T>
+where
+    T: Scalar,
+{
+    fn mul_assign(&mut self, rhs: T) {
+        self.x *= rhs;
+        self.y *= rhs;
+        self.z *= rhs;
     }
 }
 

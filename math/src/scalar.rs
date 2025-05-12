@@ -1,5 +1,5 @@
 use core::fmt;
-use std::ops::{AddAssign, Div, Mul, Sub, SubAssign};
+use std::ops::{AddAssign, Div, Mul, MulAssign, Sub, SubAssign};
 
 use num_traits::{AsPrimitive, Bounded, Float, FromPrimitive, One, Pow, Signed, ToPrimitive, Zero};
 
@@ -19,6 +19,7 @@ pub trait Scalar:
     + fmt::Debug
     + fmt::Display
     + Mul<Self, Output = Self>
+    + MulAssign<Self>
     + Div<Self, Output = Self>
     + std::iter::Sum
     + PartialOrd<Self>

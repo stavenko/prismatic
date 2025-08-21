@@ -4,10 +4,12 @@ use math::ParametricIterator;
 use math::Scalar;
 
 use math::Vector3;
+use num_traits::ToPrimitive;
 use prismatic::{geometry::GeometryDyn, indexes::geo_index::mesh::MeshRefMut};
 
+#[derive(Clone)]
 pub struct Plane<F: Scalar> {
-    origin: BaseOrigin<F>,
+    zero: BaseOrigin<F>,
     width: F,
     height: F,
     resolution: usize,
@@ -18,36 +20,35 @@ where
     F: Scalar,
 {
     pub fn centered(
-        origin: BaseOrigin<F>,
-        width: impl Into<F>,
-        height: impl Into<F>,
+        center: BaseOrigin<F>,
+        width: impl ToPrimitive,
+        height: impl ToPrimitive,
         resolution: usize,
     ) -> Self {
+        let w = F::from(width).unwrap();
+        let h = F::from(height).unwrap();
         Self {
-            origin,
-            width: width.into(),
-            height: height.into(),
+            zero: center.offset_x(-w / F::two()).offset_y(-h / F::two()),
+            width: w,
+            height: h,
             resolution,
         }
     }
 
     pub fn render(&self) -> Vec<Vec<Vector3<F>>> {
-        let wf = self.origin.center
-            - self.origin.x() * (self.width / F::from_value(2usize))
-            - self.origin.y() * (self.height / F::from_value(2usize));
-
         ParametricIterator::<F>::new(self.resolution)
             .flat_map(|(s, ss)| {
                 ParametricIterator::<F>::new(self.resolution).map(move |(t, tt)| {
-                    let ws: Vector3<F> = self.origin.x() * self.width * s;
-                    let wss: Vector3<F> = self.origin.x() * self.width * ss;
+                    let ws: Vector3<F> = self.zero.x() * self.width * s;
+                    let wss: Vector3<F> = self.zero.x() * self.width * ss;
 
-                    let ht: Vector3<F> = self.origin.y() * self.width * t;
-                    let htt: Vector3<F> = self.origin.y() * self.width * tt;
-                    let a = wf + ws + ht;
-                    let b = wf + wss + ht;
-                    let c = wf + wss + htt;
-                    let d = wf + ws + htt;
+                    let ht: Vector3<F> = self.zero.y() * self.height * t;
+                    let htt: Vector3<F> = self.zero.y() * self.height * tt;
+
+                    let a = self.zero.center + ws + ht;
+                    let b = self.zero.center + wss + ht;
+                    let c = self.zero.center + wss + htt;
+                    let d = self.zero.center + ws + htt;
                     vec![a, b, c, d]
                 })
             })
@@ -56,11 +57,13 @@ where
 }
 
 impl<F: Scalar> GeometryDyn<F> for Plane<F> {
-    fn polygonize(&self, mut mesh: MeshRefMut<F>, _complexity: usize) -> anyhow::Result<()> {
-        for p in self.render() {
-            mesh.add_polygon(p.as_slice())?;
-        }
+    fn render(&self) -> Vec<Vec<Vector3<F>>> {
+        self.render()
+    }
 
-        Ok(())
+    fn render_with_origin(&self, basis: BaseOrigin<F>) -> Vec<Vec<Vector3<F>>> {
+        let mut this = self.clone();
+        this.zero.apply_mut(&basis);
+        this.render()
     }
 }

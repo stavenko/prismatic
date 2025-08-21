@@ -1,6 +1,7 @@
 mod cross;
 #[cfg(feature = "decimal")]
 mod decimal;
+mod dot;
 mod matrix2;
 mod origin;
 mod parametric_iterator;
@@ -12,6 +13,7 @@ mod vector3;
 
 pub use cross::CrossProduct;
 pub use decimal::Dec;
+pub use dot::Dot;
 pub use matrix2::Matrix2;
 pub use origin::BaseOrigin;
 pub use parametric_iterator::*;

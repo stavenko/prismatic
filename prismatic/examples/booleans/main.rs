@@ -37,12 +37,12 @@ fn rib_unification_1(file_root: PathBuf) -> anyhow::Result<String> {
 
     let mesh_one = index.new_mesh();
 
-    Plane::centered(zero.clone(), 1.0, 1.0, 1).polygonize(mesh_one.make_mut_ref(&mut index), 0)?;
+    Plane::centered(zero.clone(), 1.0, 1.0, 1).polygonize(mesh_one.make_mut_ref(&mut index))?;
 
     let mesh_two = index.new_mesh();
 
     Plane::centered(zero.clone().offset_x(1.5_f32), 2.0, 2.0, 1)
-        .polygonize(mesh_two.make_mut_ref(&mut index), 0)?;
+        .polygonize(mesh_two.make_mut_ref(&mut index))?;
 
     Ok(index.scad())
 }
@@ -59,11 +59,11 @@ fn rib_unification_2(file_root: PathBuf) -> anyhow::Result<String> {
     let mesh_one = index.new_mesh();
     let zero = BaseOrigin::new();
 
-    Plane::centered(zero.clone(), 2.0, 2.0, 1).polygonize(mesh_one.make_mut_ref(&mut index), 0)?;
+    Plane::centered(zero.clone(), 2.0, 2.0, 1).polygonize(mesh_one.make_mut_ref(&mut index))?;
 
     let mesh_two = index.new_mesh();
     Plane::centered(zero.clone().offset_x(1.5_f32), 1.0, 1.0, 1)
-        .polygonize(mesh_two.make_mut_ref(&mut index), 0)?;
+        .polygonize(mesh_two.make_mut_ref(&mut index))?;
 
     Ok(index.scad())
 }
@@ -83,10 +83,10 @@ fn cut_planes(file_root: PathBuf) -> anyhow::Result<String> {
         .rotate_axisangle(Vector3::x() * f32::consts::FRAC_PI_2);
 
     let mesh_one = index.new_mesh();
-    Plane::centered(zero, 1.0, 1.0, 1).polygonize(mesh_one.make_mut_ref(&mut index), 0)?;
+    Plane::centered(zero, 1.0, 1.0, 1).polygonize(mesh_one.make_mut_ref(&mut index))?;
 
     let mesh_two = index.new_mesh();
-    Plane::centered(rotated, 2.0, 2.0, 1).polygonize(mesh_two.make_mut_ref(&mut index), 0)?;
+    Plane::centered(rotated, 2.0, 2.0, 1).polygonize(mesh_two.make_mut_ref(&mut index))?;
 
     Ok(index.scad())
 }
@@ -104,9 +104,9 @@ fn overlap_in_center(file_root: PathBuf) -> anyhow::Result<String> {
 
     let small_box = index.new_mesh();
     Rect::centered(zero.clone().offset_x(1.0), 1.0, 1.0, 1.0)
-        .polygonize(small_box.make_mut_ref(&mut index), 0)?;
+        .polygonize(small_box.make_mut_ref(&mut index))?;
     let big_box = index.new_mesh();
-    Rect::centered(zero, 2.0, 2.0, 2.0).polygonize(big_box.make_mut_ref(&mut index), 0)?;
+    Rect::centered(zero, 2.0, 2.0, 2.0).polygonize(big_box.make_mut_ref(&mut index))?;
 
     let to_remove = [
         small_box
@@ -140,9 +140,9 @@ fn overlap_touching_edge(file_root: PathBuf) -> anyhow::Result<String> {
     let bigger_box = Rect::centered(zero, 2.0, 2.0, 2.0);
 
     let small = index.new_mesh();
-    smaller_box.polygonize(small.make_mut_ref(&mut index), 0)?;
+    smaller_box.polygonize(small.make_mut_ref(&mut index))?;
     let big = index.new_mesh();
-    bigger_box.polygonize(big.make_mut_ref(&mut index), 0)?;
+    bigger_box.polygonize(big.make_mut_ref(&mut index))?;
 
     let remove = [
         index.select_polygons(small, big, PolygonFilter::Front),
@@ -182,9 +182,9 @@ fn overlap_touching_edge_with_opposite_polygons(file_root: PathBuf) -> anyhow::R
     let bigger_box = Rect::centered(zero, 2.0, 2.0, 2.0);
 
     let big = index.new_mesh();
-    bigger_box.polygonize(big.make_mut_ref(&mut index), 0)?;
+    bigger_box.polygonize(big.make_mut_ref(&mut index))?;
     let cut = index.new_mesh();
-    cutter.polygonize(cut.make_mut_ref(&mut index), 0)?;
+    cutter.polygonize(cut.make_mut_ref(&mut index))?;
     for p in [
         cut.make_ref(&index).all_polygons(),
         big.make_ref(&index).front_of(cut.make_ref(&index)),
@@ -197,7 +197,7 @@ fn overlap_touching_edge_with_opposite_polygons(file_root: PathBuf) -> anyhow::R
 
     let smal = index.new_mesh();
     smaller_box
-        .polygonize(smal.make_mut_ref(&mut index), 0)
+        .polygonize(smal.make_mut_ref(&mut index))
         .unwrap();
 
     let shared_of_big = big.make_ref(&index).shared_with(smal.make_ref(&index));
@@ -228,10 +228,10 @@ fn complex_cut(file_root: PathBuf) -> anyhow::Result<String> {
     let cutter = Rect::centered(zero.clone().offset_x(0.2).offset_y(0.2), 1.0, 1.0, 1.0);
 
     let platform_mesh = index.new_mesh();
-    platform.polygonize(platform_mesh.make_mut_ref(&mut index), 0)?;
+    platform.polygonize(platform_mesh.make_mut_ref(&mut index))?;
 
     let cutter_mesh = index.new_mesh();
-    cutter.polygonize(cutter_mesh.make_mut_ref(&mut index), 0)?;
+    cutter.polygonize(cutter_mesh.make_mut_ref(&mut index))?;
 
     let remove = [
         index.select_polygons(cutter_mesh, platform_mesh, PolygonFilter::Front),
@@ -252,7 +252,7 @@ fn complex_cut(file_root: PathBuf) -> anyhow::Result<String> {
     index.move_all_polygons(cutter_mesh, platform_mesh);
     let matter_mesh = index.new_mesh();
 
-    matter.polygonize(matter_mesh.make_mut_ref(&mut index), 0)?;
+    matter.polygonize(matter_mesh.make_mut_ref(&mut index))?;
 
     let remove = [
         index.select_polygons(matter_mesh, platform_mesh, PolygonFilter::Back),
@@ -326,13 +326,13 @@ fn two_identical_boxes_with_overlapped_side_and_rotated(
     let x_basis_one = BaseOrigin::new();
     let box_one = index.new_mesh();
     let box_two = index.new_mesh();
-    Rect::centered(x_basis_one, 1.0, 1.0, 1.0).polygonize(box_one.make_mut_ref(&mut index), 0)?;
+    Rect::centered(x_basis_one, 1.0, 1.0, 1.0).polygonize(box_one.make_mut_ref(&mut index))?;
 
     let rot = Quaternion::from_scaled_axis(Vector3::x() * std::f32::consts::FRAC_PI_4);
 
     let x_basis_two = BaseOrigin::new().offset_x(0.5).rotate(rot);
 
-    Rect::centered(x_basis_two, 1.0, 1.0, 1.0).polygonize(box_two.make_mut_ref(&mut index), 0)?;
+    Rect::centered(x_basis_two, 1.0, 1.0, 1.0).polygonize(box_two.make_mut_ref(&mut index))?;
 
     let remove = [
         index.select_polygons(box_one, box_two, PolygonFilter::Back),
@@ -363,13 +363,13 @@ fn two_identical_boxes_one_with_one_common_side_rotated(
     let x_basis_one = BaseOrigin::new();
     let box_one = index.new_mesh();
     let box_two = index.new_mesh();
-    Rect::centered(x_basis_one, 1.0, 1.0, 1.0).polygonize(box_one.make_mut_ref(&mut index), 0)?;
+    Rect::centered(x_basis_one, 1.0, 1.0, 1.0).polygonize(box_one.make_mut_ref(&mut index))?;
 
     let rot = Quaternion::from_scaled_axis(Vector3::x() * std::f32::consts::FRAC_PI_4);
 
     let x_basis_two = BaseOrigin::new().offset_x(1.0).rotate(rot);
 
-    Rect::centered(x_basis_two, 1.0, 1.0, 1.0).polygonize(box_two.make_mut_ref(&mut index), 0)?;
+    Rect::centered(x_basis_two, 1.0, 1.0, 1.0).polygonize(box_two.make_mut_ref(&mut index))?;
 
     let remove = [
         index.select_polygons(box_one, box_two, PolygonFilter::Back),
@@ -397,11 +397,11 @@ fn two_identical_boxes_one_with_one_common_side(file_root: PathBuf) -> anyhow::R
     let x_basis_one = BaseOrigin::new();
     let box_one = index.new_mesh();
     let box_two = index.new_mesh();
-    Rect::centered(x_basis_one, 1.0, 1.0, 1.0).polygonize(box_one.make_mut_ref(&mut index), 0)?;
+    Rect::centered(x_basis_one, 1.0, 1.0, 1.0).polygonize(box_one.make_mut_ref(&mut index))?;
 
     let x_basis_two = BaseOrigin::new().offset_x(1.0);
 
-    Rect::centered(x_basis_two, 1.0, 1.0, 1.0).polygonize(box_two.make_mut_ref(&mut index), 0)?;
+    Rect::centered(x_basis_two, 1.0, 1.0, 1.0).polygonize(box_two.make_mut_ref(&mut index))?;
 
     let remove = [
         index.select_polygons(box_one, box_two, PolygonFilter::Back),
@@ -430,11 +430,11 @@ fn two_identical_boxes_one_with_overlap(file_root: PathBuf) -> anyhow::Result<St
     let x_basis_one = BaseOrigin::new();
     let box_one = index.new_mesh();
     let box_two = index.new_mesh();
-    Rect::centered(x_basis_one, 1.0, 1.0, 1.0).polygonize(box_one.make_mut_ref(&mut index), 0)?;
+    Rect::centered(x_basis_one, 1.0, 1.0, 1.0).polygonize(box_one.make_mut_ref(&mut index))?;
 
     let x_basis_two = BaseOrigin::new().offset_x(0.8);
 
-    Rect::centered(x_basis_two, 1.0, 1.0, 1.0).polygonize(box_two.make_mut_ref(&mut index), 0)?;
+    Rect::centered(x_basis_two, 1.0, 1.0, 1.0).polygonize(box_two.make_mut_ref(&mut index))?;
 
     let remove = [
         index.select_polygons(box_one, box_two, PolygonFilter::Back),
@@ -463,11 +463,11 @@ fn two_identical_boxes_one_shifted_in_plane(file_root: PathBuf) -> anyhow::Resul
     let x_basis_one = BaseOrigin::new();
     let box_one = index.new_mesh();
     let box_two = index.new_mesh();
-    Rect::centered(x_basis_one, 1.0, 1.0, 1.0).polygonize(box_one.make_mut_ref(&mut index), 0)?;
+    Rect::centered(x_basis_one, 1.0, 1.0, 1.0).polygonize(box_one.make_mut_ref(&mut index))?;
 
     let x_basis_two = BaseOrigin::new().offset_x(0.8).offset_z(0.7);
 
-    Rect::centered(x_basis_two, 1.0, 1.0, 1.0).polygonize(box_two.make_mut_ref(&mut index), 0)?;
+    Rect::centered(x_basis_two, 1.0, 1.0, 1.0).polygonize(box_two.make_mut_ref(&mut index))?;
 
     let remove = [
         index.select_polygons(box_one, box_two, PolygonFilter::Back),
@@ -496,11 +496,11 @@ fn two_identical_boxes_one_shifted_in_space(file_root: PathBuf) -> anyhow::Resul
     let x_basis_one = BaseOrigin::new();
     let box_one = index.new_mesh();
     let box_two = index.new_mesh();
-    Rect::centered(x_basis_one, 1.0, 1.0, 1.0).polygonize(box_one.make_mut_ref(&mut index), 0)?;
+    Rect::centered(x_basis_one, 1.0, 1.0, 1.0).polygonize(box_one.make_mut_ref(&mut index))?;
 
     let x_basis_two = BaseOrigin::new().offset_x(0.6).offset_z(0.7).offset_y(0.6);
 
-    Rect::centered(x_basis_two, 1.0, 1.0, 1.0).polygonize(box_two.make_mut_ref(&mut index), 0)?;
+    Rect::centered(x_basis_two, 1.0, 1.0, 1.0).polygonize(box_two.make_mut_ref(&mut index))?;
 
     let remove = [
         index.select_polygons(box_one, box_two, PolygonFilter::Back),
@@ -531,8 +531,8 @@ fn smaller_box_cutted_by_bigger(file_root: PathBuf) -> anyhow::Result<String> {
     let box_one = index.new_mesh();
     let box_two = index.new_mesh();
 
-    Rect::centered(x_basis_one, 1.0, 1.0, 1.0).polygonize(box_one.make_mut_ref(&mut index), 0)?;
-    Rect::centered(x_basis_two, 2.5, 2.5, 0.5).polygonize(box_two.make_mut_ref(&mut index), 0)?;
+    Rect::centered(x_basis_one, 1.0, 1.0, 1.0).polygonize(box_one.make_mut_ref(&mut index))?;
+    Rect::centered(x_basis_two, 2.5, 2.5, 0.5).polygonize(box_two.make_mut_ref(&mut index))?;
 
     let remove = [
         index.select_polygons(box_one, box_two, PolygonFilter::Back),
@@ -566,8 +566,8 @@ fn smaller_box_cutted_by_longer(file_root: PathBuf) -> anyhow::Result<String> {
     let box_one = index.new_mesh();
     let box_two = index.new_mesh();
 
-    Rect::centered(x_basis_one, 1.0, 1.0, 1.0).polygonize(box_one.make_mut_ref(&mut index), 0)?;
-    Rect::centered(x_basis_two, 0.25, 0.25, 3.5).polygonize(box_two.make_mut_ref(&mut index), 0)?;
+    Rect::centered(x_basis_one, 1.0, 1.0, 1.0).polygonize(box_one.make_mut_ref(&mut index))?;
+    Rect::centered(x_basis_two, 0.25, 0.25, 3.5).polygonize(box_two.make_mut_ref(&mut index))?;
 
     let remove = [
         index.select_polygons(box_one, box_two, PolygonFilter::Back),
@@ -618,7 +618,7 @@ fn main() -> Result<(), anyhow::Error> {
             let y = grid_size * (h as f32 - (grid as f32 / 2.0));
             let i = h + (w * grid);
             if let Some(mesh) = meshes.get(i as usize) {
-                scad.push(format!("translate(v=[{}, {}, 0]) {{ {} }};", x, y, mesh));
+                scad.push(format!("translate(v=[{}, {}]) {{ {} }};", x, y, mesh));
             } else {
                 break 'outer;
             }

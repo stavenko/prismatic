@@ -1,6 +1,8 @@
 use math::{BaseOrigin, Scalar, Vector3};
+use num_traits::ToPrimitive;
 use prismatic::{geometry::GeometryDyn, indexes::geo_index::mesh::MeshRefMut};
 
+#[derive(Clone)]
 pub struct Rect<S: Scalar> {
     width: S,
     height: S,
@@ -25,8 +27,8 @@ pub struct RectBuilder<S: Scalar> {
 }
 
 impl<S: Scalar> RectBuilder<S> {
-    pub fn width(mut self, width: impl Into<S>) -> Self {
-        self.width = width.into();
+    pub fn width(mut self, width: impl ToPrimitive) -> Self {
+        self.width = S::from(width).unwrap();
         self
     }
 
@@ -35,13 +37,13 @@ impl<S: Scalar> RectBuilder<S> {
         self
     }
 
-    pub fn height(mut self, height: impl Into<S>) -> Self {
-        self.height = height.into();
+    pub fn height(mut self, height: impl ToPrimitive) -> Self {
+        self.height = S::from(height).expect("Scalar convertion from type failed");
         self
     }
 
-    pub fn depth(mut self, depth: impl Into<S>) -> Self {
-        self.depth = depth.into();
+    pub fn depth(mut self, depth: impl ToPrimitive) -> Self {
+        self.depth = S::from(depth).expect("Scalar convertion from type failed");
         self
     }
 
@@ -181,11 +183,13 @@ impl<S: Scalar> Rect<S> {
 }
 
 impl<S: Scalar> GeometryDyn<S> for Rect<S> {
-    fn polygonize(&self, mut mesh: MeshRefMut<S>, _complexity: usize) -> anyhow::Result<()> {
-        for p in self.render() {
-            mesh.add_polygon(&p)?;
-        }
+    fn render(&self) -> Vec<Vec<Vector3<S>>> {
+        self.render()
+    }
 
-        Ok(())
+    fn render_with_origin(&self, basis: BaseOrigin<S>) -> Vec<Vec<Vector3<S>>> {
+        let mut this = self.clone();
+        this.basis.apply_mut(&basis);
+        this.render()
     }
 }

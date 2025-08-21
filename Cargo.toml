@@ -8,3 +8,6 @@ members = [
  "surface"
 ]
 
+
+[profile.release]
+debug=1

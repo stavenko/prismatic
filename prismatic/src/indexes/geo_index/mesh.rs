@@ -157,6 +157,14 @@ impl<'a, S: Scalar> MeshRefMut<'a, S> {
             })
             .collect()
     }
+
+    pub fn add_polygon_no_intersect<F>(&mut self, p: &[Vector3<F>]) -> anyhow::Result<()>
+    where
+        F: Into<S> + Copy,
+    {
+        self.geo_index
+            .add_polygon_to_mesh_no_intersect(p, self.mesh_id)
+    }
 }
 
 impl<'a, S: Scalar + 'a> GeoObject<'a, S> for MeshId {

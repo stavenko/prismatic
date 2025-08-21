@@ -38,6 +38,10 @@ impl<T> Curve<T> {
         self.0 = self.0.into_iter().map(map).collect();
         self
     }
+
+    pub(crate) fn points_iter(&self) -> impl Iterator<Item = &T> {
+        self.0.iter()
+    }
 }
 
 impl<T> GetT for Curve<T>

@@ -1750,6 +1750,19 @@ where
         }
     }
 
+    pub fn move_polygon(&mut self, poly: UnrefPoly, to_mesh: MeshId) {
+        if let Some(mesh)  = self
+            .meshes
+            .get_mut(&poly.mesh_id)
+        {
+            if let Some(poly)= mesh.polies.remove(&poly.poly_id) {
+                if let Some(mesh) = self.meshes.get_mut(&to_mesh) {
+                    mesh.add(poly);
+                }
+            }
+        }
+    }
+
     pub fn is_vec_dir_between_two_other_dirs(
         &self,
         plane_normal: Vector3<S>,
@@ -2452,6 +2465,51 @@ where
         let mesh_id = self.get_next_mesh_id();
         self.meshes.insert(mesh_id, Mesh::default());
         mesh_id
+    }
+
+    pub(crate) fn add_polygon_to_mesh_no_intersect<F>(&mut self, vertices: &[Vector3<F>], mesh_id: MeshId) -> anyhow::Result<()>
+    where
+        F: Into<S> + Copy,
+    {
+        let _ts = SystemTime::now();
+        let vertices = vertices
+            .iter()
+            .map(|s| Vector3::new(s.x.into(), s.y.into(), s.z.into()))
+            .collect_vec();
+
+        let poly_mesh = self.save_polygon_new(&vertices)?;
+
+        let poly_id = if let Some(m) = self.meshes.get_mut(&mesh_id) {
+            m.add(poly_mesh)
+        } else {
+            Err(anyhow!("Mesh id {mesh_id:?} not found"))?
+        };
+
+        let poly = UnrefPoly { mesh_id, poly_id };
+
+        /*
+        let _t = SystemTime::now();
+        self.unify_faces_ribs(poly_mesh.face_id);
+
+        let _t = SystemTime::now();
+        self.find_older_and_replace_face_in_poly(poly);
+        //println!("  find-replace: {}ms", _t.elapsed().unwrap().as_millis());
+
+        let _t = SystemTime::now();
+        self.create_common_ribs_between_faces(poly, mesh_id);
+        //println!( "  common-ribs-between: {}ms", _t.elapsed().unwrap().as_millis());
+
+        let _t = SystemTime::now();
+        self.create_common_ribs_for_adjacent_faces(poly.make_ref(self).face_id());
+        //println!( "  common-ribs-adjacent: {}ms", _t.elapsed().unwrap().as_millis());
+
+        let _t = SystemTime::now();
+        self.split_faces_by_orphan_ribs();
+        //println!("  split: {}ms", _t.elapsed().unwrap().as_millis());
+
+        //println!( "Add polygon to mesh time: {}ms", ts.elapsed().unwrap().as_millis());
+        */
+        Ok(())
     }
 }
 

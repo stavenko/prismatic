@@ -1,11 +1,12 @@
 use math::{BaseOrigin, Scalar, Vector3};
+use num_traits::ToPrimitive;
 use prismatic::{geometry::GeometryDyn, indexes::geo_index::mesh::MeshRefMut};
 // use rust_decimal::Decimal;
 
 //use crate::Vector3;
 // use crate::{geometry::GeometryDyn, indexes::geo_index::mesh::MeshRefMut, origin::Origin};
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Cylinder<S: Scalar> {
     top_basis: BaseOrigin<S>,
     steps: usize,
@@ -51,9 +52,13 @@ impl<S: Scalar> Cylinder<S> {
         self
     }
 
-    pub fn with_top_at(origin: BaseOrigin<S>, height: impl Into<S>, radius: impl Into<S>) -> Self {
-        let radius = radius.into();
-        let height = height.into();
+    pub fn with_top_at(
+        origin: BaseOrigin<S>,
+        height: impl ToPrimitive,
+        radius: impl ToPrimitive,
+    ) -> Self {
+        let radius = S::from(radius).expect("Scalar conversion to type failed");
+        let height = S::from(height).expect("Scalar conversion to type failed");
         let top_basis = origin.clone();
 
         Self {
@@ -121,11 +126,21 @@ impl<S: Scalar> Cylinder<S> {
 }
 
 impl<S: Scalar> GeometryDyn<S> for Cylinder<S> {
-    fn polygonize(&self, mut mesh: MeshRefMut<S>, _complexity: usize) -> anyhow::Result<()> {
+    fn polygonize(&self, mut mesh: MeshRefMut<S>) -> anyhow::Result<()> {
         for p in self.render() {
             mesh.add_polygon(&p)?;
         }
 
         Ok(())
+    }
+
+    fn render(&self) -> Vec<Vec<Vector3<S>>> {
+        self.render()
+    }
+
+    fn render_with_origin(&self, basis: BaseOrigin<S>) -> Vec<Vec<Vector3<S>>> {
+        let mut this = self.clone();
+        this.top_basis.apply_mut(&basis);
+        this.render()
     }
 }

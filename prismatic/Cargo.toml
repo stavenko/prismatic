@@ -25,7 +25,7 @@ rust_decimal_macros = "1.33.1"
 seq-macro = "0.3.5"
 simba = { version = "0.8.1", features = ["decimal"] }
 stl_io = "0.7.0"
-#surface = { version = "0.1.0", path = "../surface" }
+surface = { version = "0.1.0", path = "../surface" }
 tap = "1.0.1"
 uuid = { version = "1.8.0", features = ["v4"] }
 

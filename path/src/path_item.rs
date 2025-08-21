@@ -1,3 +1,5 @@
+use std::collections::binary_heap::Iter;
+
 use math::{CrossProduct, Tensor, Vector3};
 
 use crate::{
@@ -14,6 +16,11 @@ impl<T> PathItem<T> {
     pub fn for_each_point(self, map: impl Fn(T) -> T) -> Self {
         match self {
             PathItem::Curve(curve) => Self::Curve(curve.for_each_point(map)),
+        }
+    }
+    pub fn points_iter<'a>(&'a self) -> impl Iterator<Item = &'a T> + 'a {
+        match self {
+            PathItem::Curve(curve) => curve.points_iter(),
         }
     }
 }

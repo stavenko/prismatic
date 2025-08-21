@@ -33,6 +33,14 @@ impl<T> Path<T> {
             self
         }
     }
+
+    pub fn is_empty(&self) -> bool {
+        self.items.len() == 0
+    }
+
+    pub fn len(&self) -> usize {
+        self.items.len()
+    }
 }
 
 impl<T> GetLength for Path<T>

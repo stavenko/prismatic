@@ -235,14 +235,6 @@ where
         let subdue_point_start = subdue_point.get_point();
         let subdue_point_weight = subdue_point_start + subdue_point.get_edge_dir();
 
-        /*
-        Curve::new_4(
-            leading_point_start,
-            leading_point_weight,
-            subdue_point_weight,
-            subdue_point_start,
-        )
-        */
         Curve::new_4(
             subdue_point_start,
             subdue_point_weight,

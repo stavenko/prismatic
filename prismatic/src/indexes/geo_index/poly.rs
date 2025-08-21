@@ -250,6 +250,7 @@ pub struct PolyRefMut<'a, S: Scalar> {
     pub(super) mesh_id: MeshId,
     pub(super) index: &'a mut GeoIndex<S>,
 }
+
 impl<S: Scalar> PolyRefMut<'_, S> {
     pub(crate) fn change_face(&mut self, face_id: FaceId) {
         if let Some(p) = self
@@ -276,6 +277,16 @@ impl<S: Scalar> PolyRefMut<'_, S> {
 
     pub fn remove(&mut self) {
         self.index.remove_polygon(self.poly_id, self.mesh_id)
+    }
+
+    pub fn move_to(&mut self, mesh: MeshId) {
+        self.index.move_polygon(
+            UnrefPoly {
+                mesh_id: self.mesh_id,
+                poly_id: self.poly_id,
+            },
+            mesh,
+        )
     }
 
     pub fn flip(&mut self) {

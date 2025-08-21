@@ -7,7 +7,7 @@ use std::{
 
 use num_traits::{One, Zero};
 
-use crate::{cross::CrossProduct, Scalar, Tensor};
+use crate::{cross::CrossProduct, dot::Dot, Scalar, Tensor};
 
 #[derive(Default, Clone, Copy, Eq, PartialEq, PartialOrd, Debug)]
 pub struct Vector3<T> {
@@ -51,6 +51,14 @@ where
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "[{}, {}, {}]", self.x, self.y, self.z)
+    }
+}
+
+impl<S: Scalar> Dot for Vector3<S> {
+    type Output = S;
+
+    fn dot(&self, rhs: &Self) -> Self::Output {
+        self.x * rhs.x + self.y * rhs.y + self.z * rhs.z
     }
 }
 
@@ -324,3 +332,19 @@ where
         }
     }
 }
+
+macro_rules! impl_mul {
+    ($($t:ty),* $(,)?) => {
+      $(
+          impl<S: Scalar> Mul<Vector3<S>> for $t {
+              type Output = Vector3<S>;
+              fn mul(self, rhs: Vector3<S>) -> Vector3<S> {
+                   rhs * S::from(self).unwrap()
+
+              }
+          }
+      )*
+    }
+}
+
+impl_mul!(i32, f32, f64);

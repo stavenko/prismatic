@@ -24,6 +24,7 @@ impl<T: Scalar> Quaternion<T> {
 
             let half_angle = angle / T::from_value(2);
             let s = half_angle.sin();
+            println!("half_angle: {angle}/2 ={half_angle}");
 
             Self {
                 x: axis.x * s,

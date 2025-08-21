@@ -3,7 +3,7 @@ use std::ops::{AddAssign, Div, Mul, Sub, SubAssign};
 
 use num_traits::{One, Zero};
 
-use crate::scalar::Scalar;
+use crate::{dot::Dot, scalar::Scalar};
 
 pub trait Tensor:
     Mul<Self::Scalar, Output = Self>

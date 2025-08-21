@@ -1,6 +1,8 @@
-use num_traits::One;
+use std::f64::consts::PI;
 
-use crate::{Quaternion, Scalar, Vector3};
+use num_traits::{One, ToPrimitive};
+
+use crate::{dot::Dot, CrossProduct, Quaternion, Scalar, Vector3};
 
 #[derive(Clone, Debug)]
 pub struct BaseOrigin<F: Scalar> {
@@ -37,24 +39,35 @@ where
         (self.x() * v.dot(&self.x()) + self.y() * v.dot(&self.y())).normalize()
     }
 
-    pub fn offset_z(mut self, amount: impl Into<F>) -> Self {
-        self.center = self.z() * amount.into() + self.center;
+    pub fn offset_z(mut self, amount: impl ToPrimitive) -> Self {
+        self.center = self.z() * F::from(amount).unwrap() + self.center;
         self
     }
 
-    pub fn offset_x(mut self, amount: impl Into<F>) -> Self {
-        self.center = self.x() * amount.into() + self.center;
+    pub fn offset_x(mut self, amount: impl ToPrimitive) -> Self {
+        self.center = self.x() * F::from(amount).unwrap() + self.center;
         self
     }
 
-    pub fn offset_y(mut self, amount: impl Into<F>) -> Self {
-        self.center = self.y() * amount.into() + self.center;
+    pub fn offset_y(mut self, amount: impl ToPrimitive) -> Self {
+        self.center = self.y() * F::from(amount).unwrap() + self.center;
         self
     }
 
-    pub fn offset(mut self, axis: Vector3<F>) -> Self {
-        self.center = axis + self.center;
-        self
+    pub fn rotate_z(self, amount: F) -> Self {
+        self.rotate_axisangle(Vector3::z() * amount)
+    }
+
+    pub fn rotate_x(self, amount: F) -> Self {
+        self.rotate_axisangle(Vector3::x() * amount)
+    }
+
+    pub fn rotate_y(self, amount: F) -> Self {
+        self.rotate_axisangle(Vector3::y() * amount)
+    }
+
+    pub fn offset(self, axis: Vector3<F>) -> Self {
+        self.offset_x(axis.x).offset_y(axis.y).offset_z(axis.z)
     }
 
     pub fn rotate(mut self, quat: Quaternion<F>) -> Self {
@@ -92,8 +105,49 @@ where
         self.rotation * Vector3::z()
     }
 
-    pub fn apply(&mut self, origin: &BaseOrigin<F>) {
+    pub fn apply_mut(&mut self, origin: &BaseOrigin<F>) {
         self.center = origin.rotation * (self.center) + origin.center;
         self.rotation = origin.rotation * self.rotation;
+    }
+
+    pub fn apply(mut self, origin: &BaseOrigin<F>) -> Self {
+        self.center = origin.rotation * (self.center) + origin.center;
+        self.rotation = origin.rotation * self.rotation;
+        self
+    }
+
+    pub fn align_z<V>(mut self, normal: V) -> Self
+    where
+        V: CrossProduct<Vector3<F>, Output = Vector3<F>> + Dot<Vector3<F>, Output = F>,
+    {
+        let angle = normal.dot(&self.z()).acos();
+        let angle_p = angle / F::pi();
+        println!("Angle: {angle}, {angle_p}");
+        if angle.is_zero() {
+            self
+        } else if angle_p.is_one() {
+            let axisangle = self.x() * -angle;
+            self.rotation = Quaternion::from_scaled_axis(axisangle) * self.rotation;
+            self
+        } else {
+            let axisangle = normal.cross_product(&self.z()).normalize() * -angle;
+
+            self.rotation = Quaternion::from_scaled_axis(axisangle) * self.rotation;
+            self
+        }
+    }
+
+    pub fn align_x<V>(mut self, normal: V) -> Self
+    where
+        V: CrossProduct<Vector3<F>, Output = Vector3<F>> + Dot<Vector3<F>, Output = F>,
+    {
+        let angle = normal.dot(&self.x()).acos();
+        if angle.is_zero() {
+            self
+        } else {
+            let axisangle = normal.cross_product(&self.x()).normalize() * -angle;
+            self.rotation = Quaternion::from_scaled_axis(axisangle) * self.rotation;
+            self
+        }
     }
 }

@@ -7,6 +7,7 @@ pub trait Scalar:
     Float
     + Zero
     + One
+    + Default
     + Bounded
     + Signed
     + Pow<i32, Output = Self>

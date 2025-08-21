@@ -3,6 +3,7 @@ pub mod geometry;
 pub mod indexes;
 pub mod linear;
 pub mod planar;
+pub mod point;
 pub mod polygon_basis;
 pub mod primitives_relation;
 pub mod reversable;
